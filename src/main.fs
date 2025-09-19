@@ -9,7 +9,7 @@
   ." Writing data to " 2dup type cr
   2dup delete-file drop
   w/o create-file throw >r
-  -rot 2dup
+  -rot 2dup swap
   s" P6" r@ wstr
   10 r@ w8
   u>str r@ wstr 32 r@ w8
@@ -20,13 +20,28 @@
 ;
 
 : generate-pnm ( u-width u-height -- width-u height-u c-addr )
-  2dup * 3 * dup cells allocate throw swap
+  dup locals| h |
+  over locals| w |
+  2dup * 3 * dup cells allocate throw locals| addr |
+  drop
   0 do
-    dup 255 swap i + c!
+  dup
+    0 do
+      w j * i + 3 * addr +
+      dup
+      i s>f w s>f f/ 255.999e f* f>s swap c!
+      dup 1 +
+      h j - s>f h s>f f/ 255.999e f* f>s swap c!
+      2 +
+      0.25e 255.999e f* f>s swap c!
+    loop
   loop
+  drop w h
+  addr
+  .s cr
 ;
 
-4 3 generate-pnm
+256 256 generate-pnm
 s" test1.pnm" write-pnm
 
 ." done." cr
