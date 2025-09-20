@@ -4,23 +4,34 @@ begin-structure vec3%
   ffield: vz
 end-structure
 
-vec3% constant point3%
-vec3% constant color%
+' vec3% alias point3%
+' vec3% alias color%
+
+
+\ New vector
+: vec3-new ( fx fy fz -- addr )
+  vec3% allocate throw dup >r
+  r@ vz f!  r@ vy f!  r@ vx f!
+  r> ;
 
 \ Allocate a vec3 and initialize it
-: vec3-alloc  ( fx fy fz "<name>" -- )
+: vec3-alloc ( fx fy fz "name" -- )
   create
-    vec3% allocate throw  dup >r
-    r@ vz f!   r@ vy f!   r@ vx f!
-    r> ,
-  does>  ( -- addr )
-    @ ;
+    vec3-new ,
+  does> ( -- addr )
+    @
+;
 
 \ Free a vec3
 : vec3-free! ( "<name>" -- )
   ' dup >body @
   free throw
   0 swap >body ! ;
+
+' vec3-alloc alias point3-alloc
+' vec3-alloc alias color-alloc
+
+: vec3-move ( src dst -- ) vec3% move ;
 
 \ print vector
 : .v ( v -- )
@@ -140,4 +151,45 @@ vec3% constant color%
     drop 1e
   then
     v v2 vdiv
+;
+
+: test-vector ( -- )
+  1e 2e 3e   vec3-new 
+  10e 20e 30e vec3-new
+  vec3% allocate throw
+  locals| c b a |
+
+  a b c v+    \ c = a + b
+
+  a .v cr
+  b .v cr
+  c .v cr
+
+  a b c v-    \ c = a - b
+
+  a .v cr
+  b .v cr
+  c .v cr
+
+  a 2e c vmul  \ c = a * 2
+
+  a .v cr
+  c .v cr
+
+  a 2e c vdiv  \ c = a / 2
+
+  a .v cr
+  c .v cr
+
+  a b vdot f. cr
+
+  a b c vcross
+  c .v cr
+
+  a vlength f. cr
+
+  a vlength2 f. cr
+
+  a c vunit
+  c .v cr
 ;

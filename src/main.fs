@@ -1,5 +1,6 @@
 include ./pnm.fs
 include ./vector.fs
+include ./ray.fs
 
 : generate-pnm ( u-width u-height -- width-u height-u c-addr )
   dup locals| h |
@@ -26,44 +27,8 @@ include ./vector.fs
 \ 256 256 generate-pnm
 \ s" test1.pnm" write-pnm
 
-1e 2e 3e vec3-alloc a
-10e 20e 30e vec3-alloc b
-create c  vec3% allot
-
-a b c v+    \ c = a + b
-
-\ 確認
-a .v cr
-b .v cr
-c .v cr
-
-a b c v-    \ c = a - b
-
-a .v cr
-b .v cr
-c .v cr
-
-a 2e c vmul  \ c = a * 2
-
-a .v cr
-c .v cr
-
-a 2e c vdiv  \ c = a / 2
-
-a .v cr
-c .v cr
-
-a b vdot f. cr
-
-a b c vcross
-c .v cr
-
-a vlength f. cr
-
-a vlength2 f. cr
-
-a c vunit
-c .v cr
+test-vector
+test-ray
 
 ." done." cr
 bye
