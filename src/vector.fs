@@ -7,10 +7,12 @@ end-structure
 ' vec3% alias point3%
 ' vec3% alias color%
 
+\ New empty vector
+: vec3-empty ( -- addr ) vec3% allocate throw ;
 
 \ New vector
 : vec3-new ( fx fy fz -- addr )
-  vec3% allocate throw dup >r
+  vec3-empty >r
   r@ vz f!  r@ vy f!  r@ vx f!
   r> ;
 
@@ -45,71 +47,75 @@ end-structure
 ;
 
 \ add vectors
-: v+ ( v1 v2 v3 -- )
-  locals| v3 v2 v1 |
+: v+ ( v1-addr v2-addr -- v3-addr )
+  locals| v2 v1 |
+  vec3-empty
 
   v1 vx f@
   v2 vx f@
   f+
-  v3 vx f!
+  dup vx f!
 
   v1 vy f@
   v2 vy f@
   f+
-  v3 vy f!
+  dup vy f!
 
   v1 vz f@
   v2 vz f@
   f+
-  v3 vz f!
+  dup vz f!
 ;
 
 \ subtract vectors
-: v- ( v1 v2 v3 -- )
-  locals| v3 v2 v1 |
+: v- ( v1-addr v2-addr -- v3-addr )
+  locals| v2 v1 |
+  vec3-empty
+
   v1 vx f@
   v2 vx f@
   f-
-  v3 vx f!
+  dup vx f!
 
   v1 vy f@
   v2 vy f@
   f-
-  v3 vy f!
+  dup vy f!
 
   v1 vz f@
   v2 vz f@
   f-
-  v3 vz f!
+  dup vz f!
 ;
 
 \ multiply vector by scalar
-: vmul ( v s v2 -- )
-  locals| v2 v |
+: vmul ( v1-addr -- v2-addr ) ( f -- )
+  locals| v |
+  vec3-empty
 
   fdup
   v vx f@
   f*
-  v2 vx f!
+  dup vx f!
 
   fdup
   v vy f@
   f*
-  v2 vy f!
+  dup vy f!
 
   v vz f@
   f*
-  v2 vz f!
+  dup vz f!
 ;
 
 \ divide vector by scalar
-: vdiv ( v s v2 -- )
+: vdiv ( v1-addr -- v2-addr ) ( f -- )
   1e fswap f/
   vmul
 ;
   
 \ dot product
-: vdot ( v1 v2 -- f )
+: vdot ( v1-addr v2-addr -- f )
   locals| v2 v1 |
   v1 vx f@ v2 vx f@ f*
   v1 vy f@ v2 vy f@ f* f+
@@ -117,19 +123,21 @@ end-structure
 ;
 
 \ cross product
-: vcross ( v1 v2 v3 -- )
-  locals| v3 v2 v1 |
+: vcross ( v1-addr v2-addr -- v3-addr )
+  locals| v2 v1 |
+  vec3-empty
+
   v1 vy f@ v2 vz f@ f*
   v1 vz f@ v2 vy f@ f* f-
   v1 vz f@ v2 vx f@ f*
   v1 vx f@ v2 vz f@ f* f-
   v1 vx f@ v2 vy f@ f*
   v1 vy f@ v2 vx f@ f* f-
-  v3 vz f! v3 vx f! v3 vy f!
+  dup vz f! dup vx f! dup vy f!
 ;
 
 \ length
-: vlength ( v -- f )
+: vlength ( v-addr -- ) ( -- f )
   locals| v |
   v vx f@ fdup f*
   v vy f@ fdup f* f+
@@ -137,7 +145,7 @@ end-structure
 ;
 
 \ length squared
-: vlength2 ( v -- f )
+: vlength2 ( v-addr -- ) ( -- f )
   locals| v |
   v vx f@ fdup f*
   v vy f@ fdup f* f+
@@ -145,12 +153,11 @@ end-structure
 ;
 
 \ unit vector
-: vunit ( v v2 -- )
-  locals| v2 v |
-  v vlength fdup 0e f= if
-    drop 1e
+: vunit ( v1-addr -- v2-addr )
+  dup vlength fdup 0e f= if
+    fdrop 1e
   then
-    v v2 vdiv
+    vdiv
 ;
 
 : test-vector ( -- )
@@ -159,37 +166,42 @@ end-structure
   vec3% allocate throw
   locals| c b a |
 
-  a b c v+    \ c = a + b
-
+  s" ---vector test" type cr
+  s" a b" type cr
   a .v cr
   b .v cr
-  c .v cr
+  
+  s" v+" type cr
+  a b v+
+  .v cr
 
-  a b c v-    \ c = a - b
+  s" v-" type cr
+  a b v-
+  .v cr
 
-  a .v cr
-  b .v cr
-  c .v cr
+  s" vmul" type cr
+  a 2e vmul
+  .v cr
 
-  a 2e c vmul  \ c = a * 2
+  s" vdiv" type cr
+  a 2e vdiv
+  .v cr
 
-  a .v cr
-  c .v cr
-
-  a 2e c vdiv  \ c = a / 2
-
-  a .v cr
-  c .v cr
-
+  s" vdot" type cr
   a b vdot f. cr
 
-  a b c vcross
-  c .v cr
+  s" vcross" type cr
+  a b vcross
+  .v cr
 
+  s" vlength" type cr
   a vlength f. cr
 
+  s" vlength2" type cr
   a vlength2 f. cr
 
-  a c vunit
-  c .v cr
+  s" vunit" type cr
+  a vunit
+  .v cr
+  cr
 ;

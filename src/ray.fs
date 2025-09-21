@@ -28,23 +28,29 @@ end-structure
 : ray-free ( addr -- ) free throw ;
 
 \ Compute point at parameter t on the ray
-: at ( ray point3 -- ) ( f -- )
-  >r
+: at ( ray -- point3 ) ( f -- )
   dup direction 
-  pad vmul
-  origin pad r@ v+
-  rdrop
+  vmul
+  origin v+
 ;
 
 \ Test ray
 : test-ray ( -- )
+  s" ---ray test" type cr
   0e 0e 0e vec3-new
   10e 20e 30e vec3-new
+
+  s" ray" type cr
   ray-new
   ray% allocate throw
   locals| s r |
+
+  s" origin" type cr
   r origin .v cr
+  s" direction" type cr
   r direction .v cr
-  r s 2e at
-  s .v cr
+  s" at 2.0" type cr
+  r 2e at
+  .v cr
+  cr
 ;
