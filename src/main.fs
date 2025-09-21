@@ -2,22 +2,29 @@ include ./pnm.fs
 include ./vector.fs
 include ./ray.fs
 
-: hit-sphere ( center ray -- t) ( f-radius -- )
+: hit-sphere ( center ray -- ) ( f-radius -- f )
   locals| ray center |
   ray origin center v- locals| oc |
   ray direction locals| dir |
-  dir dir vdot fswap
-  oc dir vdot 2e f* fswap
-  oc oc vdot fswap fdup f* f-
-  fswap fdup f* fswap 4e f* frot f* f-
-  f0< 0=
+  dir vlength2 \ r a
+  oc dir vdot \ r a b/2
+  oc vlength2 3 fpick fdup f* f- \ r a b/2 c
+  1 fpick fdup f* \ r a b/2 c (b/2)^2 
+  3 fpick 2 fpick f* \ r a b/2 c b^2 ac
+  f- \ r a b/2 c d
+  fdup f0< if
+    5 0 do fdrop loop -1e \ no hit
+  else
+    fsqrt
+    2 fpick fnegate fswap f- 3 fpick f/
+    4 0 do fdrop loop
+  then
 ;
 
 : ray-color ( ray -- color )
   locals| ray |
-  0e 0e -1e vec3-new ray 0.5e hit-sphere if
-    1e 0e 0e vec3-new
-  else
+  0e 0e -1e vec3-new ray 0.5e hit-sphere fdup f0< if
+    fdrop
     ray direction vunit
     vy f@ 1e f+ 2e f/
     fdup 1e fswap f-
@@ -26,6 +33,10 @@ include ./ray.fs
     0.5e 0.7e 1.0e vec3-new
     vmul
     v+
+  else
+    ray at 0e 0e -1e vec3-new v- vunit
+    1e 1e 1e vec3-new v+
+    2e vdiv
   then
 ;
 
