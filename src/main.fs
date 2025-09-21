@@ -2,15 +2,31 @@ include ./pnm.fs
 include ./vector.fs
 include ./ray.fs
 
+: hit-sphere ( center ray -- t) ( f-radius -- )
+  locals| ray center |
+  ray origin center v- locals| oc |
+  ray direction locals| dir |
+  dir dir vdot fswap
+  oc dir vdot 2e f* fswap
+  oc oc vdot fswap fdup f* f-
+  fswap fdup f* fswap 4e f* frot f* f-
+  f0< 0=
+;
+
 : ray-color ( ray -- color )
-  direction vunit
-  vy f@ 1e f+ 2e f/
-  fdup 1e fswap f-
-  1e 1e 1e vec3-new
-  vmul
-  0.5e 0.7e 1.0e vec3-new
-  vmul
-  v+
+  locals| ray |
+  0e 0e -1e vec3-new ray 0.5e hit-sphere if
+    1e 0e 0e vec3-new
+  else
+    ray direction vunit
+    vy f@ 1e f+ 2e f/
+    fdup 1e fswap f-
+    1e 1e 1e vec3-new
+    vmul
+    0.5e 0.7e 1.0e vec3-new
+    vmul
+    v+
+  then
 ;
 
 : pixel-color ( color -- u u u )
