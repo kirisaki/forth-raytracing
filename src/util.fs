@@ -20,8 +20,7 @@
 : fclamp ( -- ) ( n min max -- n' )
   2 fpick 2 fpick fclamp-min
   fover fclamp-max
-  fnip fnip
-  cr
+  fnip fnip fnip
 ;
 
 : test-clamp

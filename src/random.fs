@@ -4,11 +4,11 @@
   dup 12 lshift xor
   dup 25 rshift xor
   dup 27 lshift xor
-  dup 2685821657736338717 *
+  2685821657736338717 *
 ;
 
 : frand ( u -- u ) ( -- f )
-  dup rand 11 rshift
+  rand dup 11 rshift
   s>f 9007199254740992e f/ 
 ;
 

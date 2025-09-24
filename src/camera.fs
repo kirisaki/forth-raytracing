@@ -1,5 +1,5 @@
 begin-structure camera%
-  point3% +field origin
+  point3% +field cam-origin
   point3%   +field lower-left-corner
   vec3%   +field horizontal
   vec3%   +field vertical
@@ -8,7 +8,7 @@ end-structure
 \ Initialize camera
 : camera-init! ( addr o llc h v -- addr )
   >r >r >r >r
-  dup origin    r> swap vec3-move 
+  dup cam-origin    r> swap vec3-move 
   dup lower-left-corner r> swap vec3-move
   dup horizontal r> swap vec3-move
   dup vertical   r> swap vec3-move
@@ -16,9 +16,9 @@ end-structure
 
 \ New camera
 : camera-new ( o llc h v -- addr )
+  locals| v h llc o |
   camera% allocate throw
-  rot rot rot rot
-  camera-init!
+  o llc h v camera-init!
 ; 
 
 \ Allocate a camera and initialize it
@@ -30,14 +30,14 @@ end-structure
 
 \ Make a default camera
 : default-camera ( -- addr )
-  0e 0e 0e vec3-new locals| origin |
+  0e 0e 0e vec3-new locals| orig |
   3.5555556e 0e 0e vec3-new locals| horizontal |
   0e 2e 0e vec3-new locals| vertical |
-  origin
+  orig
   horizontal 2e vdiv v-
   vertical 2e vdiv v-
   0e 0e 1e vec3-new v- locals| lower-left-corner |
-  origin lower-left-corner horizontal vertical
+  orig lower-left-corner horizontal vertical
   camera-new
 ;
 
@@ -48,7 +48,7 @@ end-structure
 : .camera ( c -- )
   ." Camera:" cr
   s" origin: " type cr
-  dup origin .v cr
+  dup cam-origin .v cr
   s" lower-left-corner: " type cr
   dup lower-left-corner .v cr
   s" horizontal: " type cr
@@ -61,10 +61,9 @@ end-structure
 \ Get ray from camera at (u,v)
 : get-ray ( c -- ray ) ( u v -- )
   locals| cam |
-  cam origin
   cam lower-left-corner
-  cam horizontal vmul v+
   cam vertical vmul v+
-  cam origin v-
-  ray-new
+  cam horizontal vmul v+
+  cam cam-origin v-
+  cam cam-origin swap ray-new
 ;

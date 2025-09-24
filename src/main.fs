@@ -4,8 +4,11 @@ include ./ray.fs
 include ./sphere.fs
 include ./list.fs
 include ./hit.fs
+include ./camera.fs
 include ./random.fs
 include ./util.fs
+
+variable rng
 
 : ray-color ( ray head -- color )
   locals| head ray |
@@ -25,16 +28,20 @@ include ./util.fs
   then
 ;
 
-: pixel-color ( color -- u u u )
-  locals| color |
-  color vx f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
-  color vy f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
-  color vz f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
+: pixel-color ( color samples -- u u u )
+  locals| samples color |
+  1.0e samples s>f f/
+  fdup color vx f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| r |
+  fdup color vy f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| g |
+  color vz f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| b |
+  r g b
 ;
 
 : generate-pnm ( u-width u-height -- width-u height-u c-addr )
+  utime drop rng !
   locals| h w |
   w h * 3 * allocate throw locals| addr |
+  default-camera locals| cam |
   3.555555e 0e 0e vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
   0e 2e 0e vec3-new locals| vertical |
   0e 0e 0e vec3-new locals| orig |
@@ -49,12 +56,15 @@ include ./util.fs
 
   h 1- 0 swap do
     w 0 do
-      orig
-      lower-left-corner
-      horizontal i s>f w 1- s>f f/ vmul v+
-      vertical j s>f h 1- s>f f/ vmul v+
-      orig v-
-      ray-new head ray-color pixel-color
+      0e 0e 0e vec3-new locals| pix |
+      100 0 do
+        j s>f rng @ frand rng ! f+ w 1- s>f f/
+        k s>f rng @ frand rng ! f+ h 1- s>f f/
+        cam get-ray
+        head ray-color
+        pix v+ to pix
+      loop
+      pix 100 pixel-color
       h 1- j - w * i + 3 * addr +
       dup 2 +
       rot swap c!
@@ -67,16 +77,16 @@ include ./util.fs
   addr
 ;
 
-\ 384 216 generate-pnm
+384 216 generate-pnm
 \ 4 3 generate-pnm
-\ s" test1.pnm" write-pnm
+s" test1.pnm" write-pnm
 
 \ test-vector
 \ test-ray
 \ test-sphere
 \ test-list
 \ test-random
-test-clamp
+\ test-clamp
 
 \ 1e 2e 3e vec3-alloc orig
 \ 2e 3e 4e vec3-alloc dir
