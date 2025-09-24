@@ -21,22 +21,32 @@ end-structure
 : sphere-new ( center -- addr ) ( f-radius -- )
   sphere% allocate throw
   swap
-  ray-init!
+  sphere-init!
+;
+
+\ Display sphere
+: .sphere ( s -- )
+  s" center: " type cr
+  dup center .v cr
+  s" radius: " type cr
+  radius f@ f. cr
+  cr
 ;
 
 \ Initialize hit-record
 : hit-record-init! ( addr point normal flag -- addr ) ( f-t -- )
   >r >r >r
-  dup point    r> swap vec3-move 
-  dup normal   r> swap vec3-move
+  dup point    r> swap !
+  dup normal   r> swap !
   dup t-val    f!
   dup front-face r> swap !
 ;
 
 \ New hit-record
 : hit-record-new ( point normal flag -- addr ) ( f-t -- )
+  >r >r >r
   hit-record% allocate throw
-  rot rot rot
+  r> r> r>
   hit-record-init!
 ;
 
@@ -48,44 +58,74 @@ end-structure
   -1e hit-record-new
 ;
 
+\ Display hit-record
+: .hit-record ( rec -- )
+  s" point: " type cr
+  dup point @ .v cr
+  s" normal: " type cr
+  dup normal @ .v cr
+  s" t-val: " type cr
+  dup t-val f@ f. cr
+  s" front-face: " type cr
+  front-face @ if ." true" else ." false" then cr
+  cr
+;
+
 \ Set face normal
 : set-face-normal ( ray outward rec -- )
-  locals| ray outward rec |
+  locals| rec outward ray |
   ray direction outward vdot f0< dup if
-    true rec front-face !
+    rec front-face !
+    outward rec normal !
   else
-    false rec front-face !
-    rec normal -1e negate vmul rec normal !
+    rec front-face !
+    outward -1e vmul rec normal !
   then
 ;
 
 \ Hit sphere
-: hit-sphere ( sphere ray hit-record -- ) ( f-t-min f-t-max -- flag )
+: hit-sphere ( sphere ray rec -- flag ) ( f-t-min f-t-max -- )
   locals| rec ray s |
-  ray origin center v- locals| oc |
+  ray origin s center v- locals| oc |
   ray direction locals| dir |
   dir vlength2 \ tmin tmax a
-  oc dir vdot \ rmin tmax a b/2
-  oc vlength2 2 fpick fdup f* f- \ tmin tmax a b/2 c
+  dir oc vdot \ tmin tmax a b/2
+  oc vlength2 s radius f@ fdup f* f- \ tmin tmax a b/2 c
   1 fpick fdup f* \ tmin tmax a b/2 c (b/2)^2 
-  3 fpick 2 fpick f* \ tmin tmax a b/2 c b^2 ac
-  f- \ tmin tmax a b/2 c d
+  3 fpick 2 fpick f* \ tmin tmax a b/2 c (b/2)^2 ac
+  f- \ tm6in tmax a b/2 c d
   fdup f0< if
-    4 0 do fdrop loop false \ no hit
+    fdrop fdrop fdrop fdrop fdrop fdrop false \ no hit
   else
     fsqrt fdup \ tmin tmax a b/2 c sqrt(d) sqrt(d)
-    3 fpick fswap f- 4 fpick f/ \ tmin tmax a b/2 c sqrt(d) t1
-    fdup 7 fpick f< 6 fpick fswap f< or if
-      3 fpick f+ 4 fpick f/ \ tmin tmax a b/2 c sqrt(d) t2
-      fdup 7 fpick f< 6 fpick fswap f< or if
-        false
-      then
+    3 fpick fnegate fswap f- \ tmin tmax a b/2 c sqrt(d) t1
+    4 fpick f/ \ tmin tmax a b/2 c sqrt(d) t2
+    fdup fdup \ tmin tmax a b/2 c sqrt(d) t2 t2 t2
+    8 fpick fswap f< 6 fpick f< and if
+      fdup rec t-val f! \ tmin tmax a b/2 c sqrt(d) t2
+      ray at dup rec point !
+      s center v- s radius f@ vdiv
+      ray swap rec set-face-normal
+      fdrop fdrop fdrop fdrop fdrop fdrop
+      true
+      exit
     then
-    rec t-val f!
-    ray at dup rec point !
-    center v- s radius f@ vdiv
-    ray swap rec set-face-normal
-    true
+    fdrop \ tmin tmax a b/2 c sqrt(d)
+    fdup \ tmin tmax a b/2 c sqrt(d) sqrt(d)
+    3 fpick fnegate fswap f+ \ tmin tmax a b/2 c sqrt(d) t1
+    4 fpick f/ \ tmin tmax a b/2 c sqrt(d) t2
+    fdup fdup \ tmin tmax a b/2 c sqrt(d) t2 t2 t2
+    8 fpick fswap f< 6 fpick f< and if
+      fdup rec t-val f! \ tmin tmax a b/2 c sqrt(d)
+      ray at dup rec point !
+      s center v- s radius f@ vdiv
+      ray swap rec set-face-normal
+      fdrop fdrop fdrop fdrop fdrop fdrop
+      true
+      exit
+    then
+    fdrop fdrop fdrop fdrop fdrop fdrop fdrop
+    false
   then
 ;
 

@@ -23,6 +23,15 @@ end-structure
     ray-new ,
   does> ( -- addr ) @
 ;
+\ Display a ray
+: .ray ( r -- )
+  ." Ray:" cr
+  s" origin: " type cr
+  dup origin .v cr
+  s" direction: " type cr
+  direction .v cr
+  cr
+;
 
 \ Free a ray
 : ray-free ( addr -- ) free throw ;
@@ -31,7 +40,7 @@ end-structure
 : at ( ray -- point3 ) ( f -- )
   dup direction 
   vmul
-  origin v+
+  swap origin v+
 ;
 
 \ Test ray

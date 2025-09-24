@@ -41,8 +41,6 @@ end-structure
   drop r> drop
 ;
 
-: .val  ( x -- )  . space ;
-
 
 : test-list ( -- )
   cr ." ---test-list" cr
@@ -54,8 +52,9 @@ end-structure
   20 head push-front to head
   30 head push-front to head
 
-  ." list (foreach): "  head ['] .val foreach  cr
-
+  ." list (foreach): "  head [: . space ;] foreach  cr
+  ." list (foreach/env3): "  
+  1 2 3  head  [: .s cr swap >r >r dup 2over rot r> + + + . r> ;] foreach 3 0 do drop loop cr
   head pop-front   ( h' x | 0 0 )
   2dup 0= swap 0= and if 2drop ." pop-front: EMPTY" cr  else swap to head ." pop-front: " . cr then
 
@@ -69,6 +68,5 @@ end-structure
   2dup 0= swap 0= and if 2drop ." pop-front (empty): EMPTY" cr
                    else swap to head ." pop-front (error): " . cr then
 
-
-  ." done." cr
+  cr
 ;

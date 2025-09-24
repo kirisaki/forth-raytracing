@@ -3,30 +3,16 @@ include ./vector.fs
 include ./ray.fs
 include ./sphere.fs
 include ./list.fs
+include ./hit.fs
 
-: hit-sphere ( center ray -- ) ( f-radius -- f )
-  locals| ray center |
-  ray origin center v- locals| oc |
-  ray direction locals| dir |
-  dir vlength2 \ r a
-  oc dir vdot \ r a b/2
-  oc vlength2 3 fpick fdup f* f- \ r a b/2 c
-  1 fpick fdup f* \ r a b/2 c (b/2)^2 
-  3 fpick 2 fpick f* \ r a b/2 c b^2 ac
-  f- \ r a b/2 c d
-  fdup f0< if
-    5 0 do fdrop loop -1e \ no hit
+
+: ray-color ( ray head -- color )
+  locals| head ray |
+  hit-record-empty locals| rec |
+  0e inf
+  ray head rec hit if
+    rec normal @ 1e 1e 1e vec3-new v+ 2e vdiv
   else
-    fsqrt
-    2 fpick fnegate fswap f- 3 fpick f/
-    4 0 do fdrop loop
-  then
-;
-
-: ray-color ( ray -- color )
-  locals| ray |
-  0e 0e -1e vec3-new ray 0.5e hit-sphere fdup f0< if
-    fdrop
     ray direction vunit
     vy f@ 1e f+ 2e f/
     fdup 1e fswap f-
@@ -35,10 +21,6 @@ include ./list.fs
     0.5e 0.7e 1.0e vec3-new
     vmul
     v+
-  else
-    ray at 0e 0e -1e vec3-new v- vunit
-    1e 1e 1e vec3-new v+
-    2e vdiv
   then
 ;
 
@@ -59,6 +41,11 @@ include ./list.fs
   vertical 2e vdiv locals| llc-v |
   0e 0e 1e vec3-new locals| llc-f |
   orig llc-h v- llc-v v- llc-f v- locals| lower-left-corner |
+
+  0 locals| head |
+  0e 0e -1e vec3-new 0.5e sphere-new head push-front to head
+  0e -100.5e -1e vec3-new 100e sphere-new head push-front to head
+
   h 1- 0 swap do
     w 0 do
       orig
@@ -66,7 +53,7 @@ include ./list.fs
       horizontal i s>f w 1- s>f f/ vmul v+
       vertical j s>f h 1- s>f f/ vmul v+
       orig v-
-      ray-new ray-color pixel-color
+      ray-new head ray-color pixel-color
       h 1- j - w * i + 3 * addr +
       dup 2 +
       rot swap c!
@@ -79,14 +66,14 @@ include ./list.fs
   addr
 ;
 
-\ 384 216 generate-pnm
+384 216 generate-pnm
 \ 4 3 generate-pnm
-\ s" test1.pnm" write-pnm
+s" test1.pnm" write-pnm
 
 \ test-vector
 \ test-ray
 \ test-sphere
-test-list
+\ test-list
 
 \ 1e 2e 3e vec3-alloc orig
 \ 2e 3e 4e vec3-alloc dir
