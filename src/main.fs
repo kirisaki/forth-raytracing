@@ -5,7 +5,7 @@ include ./sphere.fs
 include ./list.fs
 include ./hit.fs
 include ./random.fs
-
+include ./util.fs
 
 : ray-color ( ray head -- color )
   locals| head ray |
@@ -75,7 +75,8 @@ include ./random.fs
 \ test-ray
 \ test-sphere
 \ test-list
-test-random
+\ test-random
+test-clamp
 
 \ 1e 2e 3e vec3-alloc orig
 \ 2e 3e 4e vec3-alloc dir
