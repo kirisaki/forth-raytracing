@@ -4,6 +4,7 @@ include ./ray.fs
 include ./sphere.fs
 include ./list.fs
 include ./hit.fs
+include ./random.fs
 
 
 : ray-color ( ray head -- color )
@@ -66,14 +67,15 @@ include ./hit.fs
   addr
 ;
 
-384 216 generate-pnm
+\ 384 216 generate-pnm
 \ 4 3 generate-pnm
-s" test1.pnm" write-pnm
+\ s" test1.pnm" write-pnm
 
 \ test-vector
 \ test-ray
 \ test-sphere
 \ test-list
+test-random
 
 \ 1e 2e 3e vec3-alloc orig
 \ 2e 3e 4e vec3-alloc dir
