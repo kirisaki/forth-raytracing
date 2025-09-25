@@ -10,12 +10,17 @@ include ./util.fs
 
 variable rng
 
-: ray-color ( ray head -- color )
-  locals| head ray |
+: ray-color ( ray head depth -- color )
+  locals| depth head ray |
   hit-record-empty locals| rec |
-  0e inf
+  depth 0<= if
+    0e 0e 0e vec3-new
+    exit
+  then
+  0.001e inf
   ray head rec hit if
-    rec normal @ 1e 1e 1e vec3-new v+ 2e vdiv
+    rec point @ dup rec normal @ v+ rec normal @ rng @ vrand-in-hemisphere swap rng ! v+
+    rec point @ v- ray-new head depth 1- recurse 0.5e vmul
   else
     ray direction vunit
     vy f@ 1e f+ 2e f/
@@ -31,9 +36,9 @@ variable rng
 : pixel-color ( color samples -- u u u )
   locals| samples color |
   1.0e samples s>f f/
-  fdup color vx f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| r |
-  fdup color vy f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| g |
-  color vz f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| b |
+  fdup color vx f@ f* fsqrt 0e 0.999e fclamp 256e f* floor f>s locals| r |
+  fdup color vy f@ f* fsqrt 0e 0.999e fclamp 256e f* floor f>s locals| g |
+  color vz f@ f* fsqrt 0e 0.999e fclamp 256e f* floor f>s locals| b |
   r g b
 ;
 
@@ -55,13 +60,14 @@ variable rng
   0e -100.5e -1e vec3-new 100e sphere-new head push-front to head
 
   h 1- 0 swap do
+    i .
     w 0 do
       0e 0e 0e vec3-new locals| pix |
       100 0 do
         j s>f rng @ frand rng ! f+ w 1- s>f f/
         k s>f rng @ frand rng ! f+ h 1- s>f f/
         cam get-ray
-        head ray-color
+        head 50 ray-color
         pix v+ to pix
       loop
       pix 100 pixel-color
@@ -77,14 +83,14 @@ variable rng
   addr
 ;
 
-\ 384 216 generate-pnm s" test1.pnm" write-pnm
+384 216 generate-pnm s" test1.pnm" write-pnm
 
 
 \ test-vector
 \ test-ray
 \ test-sphere
 \ test-list
-test-random
+\ test-random
 \ test-clamp
 
 \ 1e 2e 3e vec3-alloc orig

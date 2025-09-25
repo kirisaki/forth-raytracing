@@ -49,6 +49,16 @@
   again
 ;
 
+\ Generate a random vector in hemisphere
+: vrand-in-hemisphere ( normal-addr u -- u v-addr )
+  swap
+  locals| normal |
+  vrand-in-unit-sphere
+  dup normal vdot 0e f< if
+    -1e vmul
+  then
+;
+
 : test-random ( -- )
   cr ." ---test-random" cr
   ." 10 random numbers: " cr
