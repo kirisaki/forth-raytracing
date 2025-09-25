@@ -77,15 +77,14 @@ variable rng
   addr
 ;
 
-384 216 generate-pnm
-\ 4 3 generate-pnm
-s" test1.pnm" write-pnm
+\ 384 216 generate-pnm s" test1.pnm" write-pnm
+
 
 \ test-vector
 \ test-ray
 \ test-sphere
 \ test-list
-\ test-random
+test-random
 \ test-clamp
 
 \ 1e 2e 3e vec3-alloc orig
