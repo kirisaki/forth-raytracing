@@ -54,7 +54,7 @@ variable rng
   utime drop rng !
   locals| h w |
   w h * 3 * allocate throw locals| addr |
-  default-camera locals| cam |
+  pi 2e f/ 16e 9e f/ make-camera locals| cam |
   3.555555e 0e 0e vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
   0e 2e 0e vec3-new locals| vertical |
   0e 0e 0e vec3-new locals| orig |
