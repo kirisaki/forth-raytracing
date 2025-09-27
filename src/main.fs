@@ -66,8 +66,8 @@ variable rng
   0 locals| head |
   0e 0e -1e vec3-new 0.5e lambertian 0.7e 0.3e 0.3e color-new 0e material-new sphere-new head push-front to head
   0e -100.5e -1e vec3-new 100e lambertian 0.8e 0.8e 0e color-new 0e material-new sphere-new head push-front to head
-  1e 0e -1e vec3-new 0.5e metal 0.8e 0.6e 0.2e color-new 0e material-new sphere-new head push-front to head
-  -1e 0e -1e vec3-new 0.5e metal 0.8e 0.8e 0.8e color-new 0e material-new sphere-new head push-front to head
+  1e 0e -1e vec3-new 0.5e metal 0.8e 0.6e 0.2e color-new 0.3e material-new sphere-new head push-front to head
+  -1e 0e -1e vec3-new 0.5e metal 0.8e 0.8e 0.8e color-new 0.9e material-new sphere-new head push-front to head
 
   h 1- 0 swap do
     i .

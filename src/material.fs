@@ -52,23 +52,23 @@ end-structure
 : scatter ( mat ray rec rng -- out-ray att flag rng ) 
   locals| rng rec ray mat |
   mat material-type @ @
+  rng >r
   case
     lambertian of
-      rec normal @ rng vrand-in-unit-sphere swap >r v+
+      rec normal @ r> vrand-in-unit-sphere swap >r v+
       rec point @ swap ray-new
       mat @ albedo @
       true
-      r>
     endof
     metal of
       ray direction vunit
-      rec normal @ vreflect 
+      rec normal @ vreflect r> vrand-in-unit-sphere swap >r mat @ fuzz f@ vmul v+
       rec point @ swap ray-new dup
       mat @ albedo @
       swap direction rec normal @ vdot f0>
-      rng
     endof
   endcase
+  r>
 ;
 
 : test-material ( -- )
