@@ -144,7 +144,7 @@ end-structure
   v1 vx f@ v2 vz f@ f* f-
   v1 vx f@ v2 vy f@ f*
   v1 vy f@ v2 vx f@ f* f-
-  dup vz f! dup vx f! dup vy f!
+  dup vz f! dup vy f! dup vx f!
 ;
 
 \ length

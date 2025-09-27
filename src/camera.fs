@@ -29,15 +29,18 @@ end-structure
 ;
 
 \ Make a camera
-: make-camera ( -- cam-addr ) ( fov aspect -- )
+: make-camera ( lookfrom lookat vup -- cam-addr ) ( fov aspect -- )
+  locals| vup lookat orig |
   fswap 2e f/ ftan \ h
   2e f* \ aspect height
   ftuck f* \ height width
 
-  0e 0e 0e vec3-new locals| orig |
-  0e 0e vec3-new locals| horizontal |
-  0e fswap 0e vec3-new locals| vertical |
-  orig horizontal 2e vdiv v- vertical 2e vdiv v- 0e 0e 1e vec3-new v- locals| llc |
+  orig lookat v- vunit \ w
+  dup vup swap vcross vunit \ w u
+  2dup vcross \ w u v
+  over vmul locals| horizontal | \ w u v
+  vmul locals| vertical | \ w u
+  drop orig swap v- horizontal 2e vdiv v- vertical 2e vdiv v- locals| llc |
   orig llc horizontal vertical camera-new
 ;
 
