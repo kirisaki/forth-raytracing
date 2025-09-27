@@ -1,6 +1,7 @@
 begin-structure sphere%
   point3% +field center
   ffield: radius
+  field: material
 end-structure
 
 begin-structure hit-record%
@@ -8,20 +9,23 @@ begin-structure hit-record%
   vec3%   +field normal
   ffield: t-val
   field: front-face
-  field: material
+  field: rec-material
 end-structure
 
 \ Initialize sphere
-: sphere-init! ( addr center -- addr ) ( f-radius -- )
-  >r
-  dup center r> swap vec3-move 
-  dup radius f!
+: sphere-init! ( addr center material-- addr ) ( f-radius -- )
+  locals| mat c addr |
+  c addr center vec3-move 
+  addr radius f!
+  mat addr material !
+  addr
 ;
 
 \ New sphere
-: sphere-new ( center -- addr ) ( f-radius -- )
+: sphere-new ( center material -- addr ) ( f-radius -- )
+  >r >r
   sphere% allocate throw
-  swap
+  r> r>
   sphere-init!
 ;
 
@@ -30,7 +34,9 @@ end-structure
   s" center: " type cr
   dup center .v cr
   s" radius: " type cr
-  radius f@ f. cr
+  dup radius f@ f. cr
+  s" material: " type cr
+  material @ . cr
   cr
 ;
 
@@ -41,7 +47,7 @@ end-structure
   dup normal   r> swap !
   dup t-val    f!
   dup front-face r> swap !
-  dup material r> swap !
+  dup rec-material r> swap !
 ;
 
 \ New hit-record
@@ -70,9 +76,9 @@ end-structure
   s" t-val: " type cr
   dup t-val f@ f. cr
   s" front-face: " type cr
-  front-face @ if ." true" else ." false" then cr
+  dup front-face @ if ." true" else ." false" then cr
   s" material: " type cr
-  material @ .
+  rec-material .
   cr
 ;
 
@@ -111,6 +117,7 @@ end-structure
       ray at dup rec point !
       s center v- s radius f@ vdiv
       ray swap rec set-face-normal
+      s material @ rec rec-material !
       fdrop fdrop fdrop fdrop fdrop fdrop
       true
       exit
@@ -125,6 +132,7 @@ end-structure
       ray at dup rec point !
       s center v- s radius f@ vdiv
       ray swap rec set-face-normal
+      s material @ rec rec-material !
       fdrop fdrop fdrop fdrop fdrop fdrop
       true
       exit

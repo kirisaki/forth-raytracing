@@ -41,3 +41,26 @@
   ." 1.5 clamped to [0.0, 1.0]: "
   1.5e 0.0e 1.0e fclamp f. cr
 ;
+
+\ Bye when the length of the stack greater than n
+: bye< ( n -- )
+  1+ depth < if
+    cr
+    .s cr
+    bye
+  then
+;
+
+\ Log with the stack
+: log ( c-addr u -- )
+  type ." :" .s cr
+;
+
+\ Log when the length of the stack greater than n
+: log< ( c-addr u n -- )
+  2 + depth < if
+    log
+  else
+    2drop
+  then
+;

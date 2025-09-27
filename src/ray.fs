@@ -12,8 +12,9 @@ end-structure
 
 \ New ray
 : ray-new ( o d -- addr )
+  >r >r
   ray% allocate throw
-  rot rot
+  r> r>
   ray-init!
 ;
 

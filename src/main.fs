@@ -1,3 +1,4 @@
+include ./util.fs
 include ./pnm.fs
 include ./vector.fs
 include ./ray.fs
@@ -6,23 +7,29 @@ include ./list.fs
 include ./hit.fs
 include ./camera.fs
 include ./random.fs
-include ./util.fs
 include ./material.fs
 
 variable rng
 
 : ray-color ( ray head depth -- color )
-  locals| depth head ray |
+  locals| d head ray |
   hit-record-empty locals| rec |
-  depth 0<= if
+  d 0<= if
     0e 0e 0e vec3-new
     exit
   then
   0.001e inf
   ray head rec hit if
-    rec point @ dup rec normal @ v+ rec normal @ rng @ vrand-in-hemisphere swap rng ! v+
-    rec point @ v- ray-new head depth 1- recurse 0.5e vmul
+    rec rec-material ray rec rng @ scatter rng ! 
+    if
+      \ scattered
+      swap head d 1- recurse vhprod 
+    else
+      \ absorb
+      2drop 0e 0e 0e vec3-new 
+    then
   else
+    \ background
     ray direction vunit
     vy f@ 1e f+ 2e f/
     fdup 1e fswap f-
@@ -57,8 +64,10 @@ variable rng
   orig llc-h v- llc-v v- llc-f v- locals| lower-left-corner |
 
   0 locals| head |
-  0e 0e -1e vec3-new 0.5e sphere-new head push-front to head
-  0e -100.5e -1e vec3-new 100e sphere-new head push-front to head
+  0e 0e -1e vec3-new 0.5e lambertian 0.7e 0.3e 0.3e color-new 0e material-new sphere-new head push-front to head
+  0e -100.5e -1e vec3-new 100e lambertian 0.8e 0.8e 0e color-new 0e material-new sphere-new head push-front to head
+  1e 0e -1e vec3-new 0.5e metal 0.8e 0.6e 0.2e color-new 0e material-new sphere-new head push-front to head
+  -1e 0e -1e vec3-new 0.5e metal 0.8e 0.8e 0.8e color-new 0e material-new sphere-new head push-front to head
 
   h 1- 0 swap do
     i .
@@ -68,7 +77,7 @@ variable rng
         j s>f rng @ frand rng ! f+ w 1- s>f f/
         k s>f rng @ frand rng ! f+ h 1- s>f f/
         cam get-ray
-        head 50 ray-color
+        head 10 ray-color
         pix v+ to pix
       loop
       pix 100 pixel-color
@@ -83,7 +92,7 @@ variable rng
   w h
   addr
 ;
-
+192 108 generate-pnm s" test1.pnm" write-pnm
 \ 384 216 generate-pnm s" test1.pnm" write-pnm
 
 
@@ -93,7 +102,7 @@ variable rng
 \ test-list
 \ test-random
 \ test-clamp
-test-material
+\ test-material
 
 \ 1e 2e 3e vec3-alloc orig
 \ 2e 3e 4e vec3-alloc dir

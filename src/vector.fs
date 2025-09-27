@@ -16,6 +16,8 @@ end-structure
   r@ vz f!  r@ vy f!  r@ vx f!
   r> ;
 
+' vec3-new alias color-new
+
 \ Allocate a vec3 and initialize it
 : vec3-alloc ( fx fy fz "name" -- )
   create
@@ -88,6 +90,15 @@ end-structure
   dup vz f!
 ;
 
+\ Multipuly vector by vector (Hadamard product)
+: vhprod ( v1-addr v2-addr -- v3-addr )
+  locals| v2 v1 |
+  vec3-empty
+  v1 vx f@ v2 vx f@ f* dup vx f!
+  v1 vy f@ v2 vy f@ f* dup vy f!
+  v1 vz f@ v2 vz f@ f* dup vz f!
+;
+
 \ multiply vector by scalar
 : vmul ( v1-addr -- v2-addr ) ( f -- )
   locals| v |
@@ -158,6 +169,12 @@ end-structure
     fdrop 1e
   then
     vdiv
+;
+
+\ Reflect vector v about normal n
+: vreflect ( v n -- v )
+  locals| n v |
+  v n vdot 2e f* n vmul v swap v-
 ;
 
 : test-vector ( -- )

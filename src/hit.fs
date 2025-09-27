@@ -12,7 +12,7 @@
     locals| sphere rec hit-anything ray |
     hit-record-empty locals| temp-rec |
     ray hit-anything rec
-    sphere ray temp-rec hit-sphere if
+    sphere ray temp-rec hit-sphere if 
       true hit-anything !
       fdrop temp-rec t-val f@
       temp-rec rec hit-record% move
