@@ -172,9 +172,17 @@ end-structure
 ;
 
 \ Reflect vector v about normal n
-: vreflect ( v n -- v )
+: vreflect ( uv n -- v )
   locals| n v |
   v n vdot 2e f* n vmul v swap v-
+;
+
+\ Refract vector uv with normal n and refraction ratio etai_over_etat
+: vrefract ( uv n -- refracted ) ( etai_over_etat -- )
+  locals| n uv |
+  uv n vdot fnegate 1e fmin
+  n vmul uv v+ vmul
+  dup vlength2 1e fswap f- fabs fsqrt fnegate n vmul v+
 ;
 
 : test-vector ( -- )
