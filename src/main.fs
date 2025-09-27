@@ -7,6 +7,7 @@ include ./hit.fs
 include ./camera.fs
 include ./random.fs
 include ./util.fs
+include ./material.fs
 
 variable rng
 
@@ -83,7 +84,7 @@ variable rng
   addr
 ;
 
-384 216 generate-pnm s" test1.pnm" write-pnm
+\ 384 216 generate-pnm s" test1.pnm" write-pnm
 
 
 \ test-vector
@@ -92,6 +93,7 @@ variable rng
 \ test-list
 \ test-random
 \ test-clamp
+test-material
 
 \ 1e 2e 3e vec3-alloc orig
 \ 2e 3e 4e vec3-alloc dir

@@ -8,6 +8,7 @@ begin-structure hit-record%
   vec3%   +field normal
   ffield: t-val
   field: front-face
+  field: material
 end-structure
 
 \ Initialize sphere
@@ -34,19 +35,20 @@ end-structure
 ;
 
 \ Initialize hit-record
-: hit-record-init! ( addr point normal flag -- addr ) ( f-t -- )
-  >r >r >r
+: hit-record-init! ( addr point normal flag material -- addr ) ( f-t -- )
+  >r >r >r >r
   dup point    r> swap !
   dup normal   r> swap !
   dup t-val    f!
   dup front-face r> swap !
+  dup material r> swap !
 ;
 
 \ New hit-record
 : hit-record-new ( point normal flag -- addr ) ( f-t -- )
-  >r >r >r
+  >r >r >r >r
   hit-record% allocate throw
-  r> r> r>
+  r> r> r> r>
   hit-record-init!
 ;
 
@@ -55,6 +57,7 @@ end-structure
   0e 0e 0e vec3-new
   0e 0e 0e vec3-new
   false
+  0
   -1e hit-record-new
 ;
 
@@ -68,6 +71,8 @@ end-structure
   dup t-val f@ f. cr
   s" front-face: " type cr
   front-face @ if ." true" else ." false" then cr
+  s" material: " type cr
+  material @ .
   cr
 ;
 
