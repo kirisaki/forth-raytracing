@@ -75,9 +75,11 @@ variable rng
   \ three spheres
   0e 1e 0e vec3-new 1e dielectric 0e 0e 0e color-new 0e 1.5e material-new sphere-new head push-front to head
   -4e 1e 0e vec3-new 1e lambertian 0.4e 0.2e 0.1e color-new 0e 0e material-new sphere-new head push-front to head
-  4e 1e 0e vec3-new 1e metal 0.7e 0.6e 0.5e color-new 0e 0e material-new sphere-new head push-front to head
+  4e 1e 0e vec3-new 1e metal 0.7e 0.6e 0.5e color-new 0.1e 0e material-new sphere-new head push-front to head
 
   \ random small spheres
+  \ true if
+  false if
   11 -11 do
     11 -11 do
       j s>f 0.9e rng @ frand rng ! f* f+
@@ -104,6 +106,7 @@ variable rng
       then
     loop
   loop
+  then
 
   0e 0e 0e vec3-new locals| pix |
   h 1- 0 swap do

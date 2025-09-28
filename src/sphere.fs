@@ -43,8 +43,8 @@ end-structure
 \ Initialize hit-record
 : hit-record-init! ( addr point normal flag material -- addr ) ( f-t -- )
   >r >r >r >r
-  dup point    r> swap !
-  dup normal   r> swap !
+  dup point    r> swap vec3-move
+  dup normal   r> swap vec3-move
   dup t-val    f!
   dup front-face r> swap !
   dup rec-material r> swap !
@@ -85,12 +85,12 @@ end-structure
 \ Set face normal
 : set-face-normal ( ray outward rec -- )
   locals| rec outward ray |
-  ray direction outward vdot f0< dup if
+  ray direction outward vdot 0e f< dup if
     rec front-face !
-    outward rec normal !
+    outward rec normal vec3-move
   else
     rec front-face !
-    outward -1e vmul rec normal !
+    outward -1e vmul dup rec normal vec3-move free throw
   then
 ;
 
@@ -114,7 +114,7 @@ end-structure
     fdup fdup \ tmin tmax a b/2 c sqrt(d) t2 t2 t2
     8 fpick fswap f< 6 fpick f< and if
       fdup rec t-val f! \ tmin tmax a b/2 c sqrt(d) t2
-      ray at dup rec point !
+      ray at dup rec point vec3-move
       s center v- dup s radius f@ vdiv swap free throw
       ray swap rec set-face-normal
       s material @ rec rec-material !
@@ -129,7 +129,7 @@ end-structure
     fdup fdup \ tmin tmax a b/2 c sqrt(d) t2 t2 t2
     8 fpick fswap f< 6 fpick f< and if
       fdup rec t-val f! \ tmin tmax a b/2 c sqrt(d)
-      ray at dup rec point !
+      ray at dup rec point vec3-move
       s center v- dup s radius f@ vdiv swap free throw
       ray swap rec set-face-normal
       s material @ rec rec-material !
