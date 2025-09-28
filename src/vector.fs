@@ -165,7 +165,7 @@ end-structure
   locals| n uv |
   uv n vdot fnegate 1e fmin
   n vmul dup uv v+ swap free throw dup vmul swap free throw
-  dup vlength2 1e fswap f- fabs fsqrt fnegate n vmul v+
+  dup vlength2 1e fswap f- fabs fsqrt fnegate n vmul over v+ swap free throw
 ;
 
 : test-vector ( -- )

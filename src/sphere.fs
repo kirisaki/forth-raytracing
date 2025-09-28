@@ -139,8 +139,8 @@ end-structure
     then
     fdrop fdrop fdrop fdrop fdrop fdrop fdrop
     false
-    oc free throw
   then
+  oc free throw
 ;
 
 : test-sphere ( -- )
