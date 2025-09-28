@@ -115,7 +115,7 @@ end-structure
     8 fpick fswap f< 6 fpick f< and if
       fdup rec t-val f! \ tmin tmax a b/2 c sqrt(d) t2
       ray at dup rec point !
-      s center v- s radius f@ vdiv
+      s center v- dup s radius f@ vdiv swap free throw
       ray swap rec set-face-normal
       s material @ rec rec-material !
       fdrop fdrop fdrop fdrop fdrop fdrop
@@ -130,7 +130,7 @@ end-structure
     8 fpick fswap f< 6 fpick f< and if
       fdup rec t-val f! \ tmin tmax a b/2 c sqrt(d)
       ray at dup rec point !
-      s center v- s radius f@ vdiv
+      s center v- dup s radius f@ vdiv swap free throw
       ray swap rec set-face-normal
       s material @ rec rec-material !
       fdrop fdrop fdrop fdrop fdrop fdrop
@@ -139,6 +139,7 @@ end-structure
     then
     fdrop fdrop fdrop fdrop fdrop fdrop fdrop
     false
+    oc free throw
   then
 ;
 

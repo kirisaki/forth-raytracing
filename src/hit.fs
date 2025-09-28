@@ -16,11 +16,12 @@
       true hit-anything !
       fdrop temp-rec t-val f@
       temp-rec rec hit-record% move
+      temp-rec free throw
     then
     r>
   ;] foreach
   2drop drop
   fdrop fdrop 
-  r> @
+  r> dup @ swap free throw
 ;
 \ 1 2 3  head  [: swap >r >r dup 2over rot r> + + + . r> ;] foreach 3 0 do drop loop cr

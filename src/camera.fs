@@ -71,13 +71,13 @@ end-structure
   cam lens-radius f@ r> vrand-in-unit-disk swap >r vmul locals| rd |
   cam cam-u rd vx f@ vmul
   cam cam-v rd vy f@ vmul
-  v+ locals| offset |
+  over over v+ locals| offset | free throw free throw
 
   cam origin offset v+
   cam lower-left-corner
   cam horizontal fswap vmul v+
-  cam vertical vmul v+
-  cam origin v-
-  offset v-
+  dup cam vertical vmul v+ swap free throw
+  dup cam origin v- swap free throw
+  dup offset v- swap free throw
   ray-new r>
 ;

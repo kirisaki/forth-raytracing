@@ -66,14 +66,14 @@ end-structure
   rng >r
   case
     lambertian of
-      rec normal @ r> vrand-in-unit-sphere swap >r v+
+      rec normal @ r> vrand-in-unit-sphere swap >r tuck v+ swap free throw
       rec point @ swap ray-new
       mat @ albedo @
       true
     endof
     metal of
       ray direction vunit
-      rec normal @ vreflect r> vrand-in-unit-sphere swap >r mat @ fuzz f@ vmul v+
+      rec normal @ vreflect  dup r> vrand-in-unit-sphere swap >r dup mat @ fuzz f@ vmul swap free throw dup rot v+ rot rot free throw free throw
       rec point @ swap ray-new dup
       mat @ albedo @
       swap direction rec normal @ vdot f0>
@@ -89,7 +89,7 @@ end-structure
       fdup fdup f* 1e fswap f- fabs fsqrt \ etai etai cos sin
       2 fpick f* 1e f> if \ etai etai cos
         \ total internal reflection
-        ray direction vunit rec normal @ vreflect
+        ray direction vunit dup rec normal @ vreflect swap free throw
         rec point @ swap ray-new
         1e 1e 1e color-new
         true
@@ -97,14 +97,14 @@ end-structure
       else
         fswap schlick r> frand >r f> if
           \ reflect
-          ray direction vunit rec normal @ vreflect
+          ray direction vunit dup rec normal @ vreflect swap free throw
           rec point @ swap ray-new
           1e 1e 1e color-new
           true
           fdrop 
         else
           \ refraction
-          ray direction vunit rec normal @ vrefract
+          ray direction vunit dup rec normal @ vrefract swap free throw
           rec point @ swap ray-new
           1e 1e 1e color-new
           true
