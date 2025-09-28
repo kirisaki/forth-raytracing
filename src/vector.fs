@@ -18,23 +18,6 @@ end-structure
 
 ' vec3-new alias color-new
 
-\ Allocate a vec3 and initialize it
-: vec3-alloc ( fx fy fz "name" -- )
-  create
-    vec3-new ,
-  does> ( -- addr )
-    @
-;
-
-\ Free a vec3
-: vec3-free! ( "<name>" -- )
-  ' dup >body @
-  free throw
-  0 swap >body ! ;
-
-' vec3-alloc alias point3-alloc
-' vec3-alloc alias color-alloc
-
 : vec3-move ( src dst -- ) vec3% move ;
 
 \ print vector
@@ -174,14 +157,14 @@ end-structure
 \ Reflect vector v about normal n
 : vreflect ( uv n -- v )
   locals| n v |
-  v n vdot 2e f* n vmul v swap v-
+  v n vdot 2e f* n vmul dup v swap v- swap free throw
 ;
 
 \ Refract vector uv with normal n and refraction ratio etai_over_etat
 : vrefract ( uv n -- refracted ) ( etai_over_etat -- )
   locals| n uv |
   uv n vdot fnegate 1e fmin
-  n vmul uv v+ vmul
+  n vmul dup uv v+ swap free throw dup vmul swap free throw
   dup vlength2 1e fswap f- fabs fsqrt fnegate n vmul v+
 ;
 

@@ -29,13 +29,6 @@ end-structure
   o llc horizontal vertical u v w camera-init!
 ; 
 
-\ Allocate a camera and initialize it
-: camera-alloc ( o llc h v "name" -- )
-  create
-    camera-new ,
-  does> ( -- addr ) @
-;
-
 \ Make a camera
 : make-camera ( lookfrom lookat vup -- cam-addr ) ( fov aspect aperture focus-dist -- )
   locals| vup lookat orig |

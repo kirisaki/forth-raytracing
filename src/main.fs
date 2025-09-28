@@ -21,24 +21,26 @@ variable rng
   0.001e inf
   ray head rec hit if
     rec rec-material ray rec rng @ scatter rng ! 
-    if
+    if locals| att out-ray |
       \ scattered
-      swap head d 1- recurse vhprod 
+      out-ray head d 1- recurse att vhprod 
+      out-ray free throw
     else
       \ absorb
-      2drop 0e 0e 0e vec3-new 
+      free throw drop 0e 0e 0e vec3-new 
     then
   else
     \ background
     ray direction vunit
     vy f@ 1e f+ 2e f/
     fdup 1e fswap f-
-    1e 1e 1e vec3-new
-    vmul
-    0.5e 0.7e 1.0e vec3-new
-    vmul
-    v+
+    1e 1e 1e vec3-new dup
+    vmul swap free throw
+    0.5e 0.7e 1.0e vec3-new dup
+    vmul swap free throw
+    over over v+ -rot free throw free throw
   then
+  rec free throw
 ;
 
 : pixel-color ( color samples -- u u u )

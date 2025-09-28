@@ -40,8 +40,8 @@ end-structure
 \ Compute point at parameter t on the ray
 : at ( ray -- point3 ) ( f -- )
   dup direction 
-  vmul
-  swap origin v+
+  vmul dup
+  rot origin v+ swap free throw
 ;
 
 \ Test ray
