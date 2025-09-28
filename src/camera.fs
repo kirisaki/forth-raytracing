@@ -3,22 +3,30 @@ begin-structure camera%
   point3%   +field lower-left-corner
   vec3%   +field horizontal
   vec3%   +field vertical
+  vec3%   +field cam-u
+  vec3%   +field cam-v
+  vec3%   +field cam-w
+  ffield: lens-radius
 end-structure
 
 \ Initialize camera
-: camera-init! ( addr o llc h v -- addr )
-  >r >r >r >r
+: camera-init! ( addr o llc horizontal vertical u v w -- addr ) ( f-lens-radius -- )
+  >r >r >r >r >r >r >r
   dup cam-origin    r> swap vec3-move 
   dup lower-left-corner r> swap vec3-move
   dup horizontal r> swap vec3-move
   dup vertical   r> swap vec3-move
+  dup cam-u r> swap vec3-move
+  dup cam-v r> swap vec3-move
+  dup cam-w r> swap vec3-move
+  dup lens-radius f!
 ;
 
 \ New camera
-: camera-new ( o llc h v -- addr )
-  locals| v h llc o |
+: camera-new ( o llc horizontal vertical u v w -- addr ) ( lens-radius -- )
+  locals| w v u vertical horizontal llc o |
   camera% allocate throw
-  o llc h v camera-init!
+  o llc horizontal vertical u v w camera-init!
 ; 
 
 \ Allocate a camera and initialize it
@@ -29,19 +37,21 @@ end-structure
 ;
 
 \ Make a camera
-: make-camera ( lookfrom lookat vup -- cam-addr ) ( fov aspect -- )
+: make-camera ( lookfrom lookat vup -- cam-addr ) ( fov aspect aperture focus-dist -- )
   locals| vup lookat orig |
-  fswap 2e f/ ftan \ h
-  2e f* \ aspect height
-  ftuck f* \ height width
+  3 fpick 2e f/ ftan 
+  2e f*
+  fdup 3 fpick f* \ fov aspect aperture focus-dist height width
 
   orig lookat v- vunit \ w
   dup vup swap vcross vunit \ w u
-  2dup vcross \ w u v
-  over vmul locals| horizontal | \ w u v
-  vmul locals| vertical | \ w u
-  drop orig swap v- horizontal 2e vdiv v- vertical 2e vdiv v- locals| llc |
-  orig llc horizontal vertical camera-new
+  2dup vcross locals| v u w |
+
+  u 2 fpick f* vmul locals| horizontal | 
+  v fover f* vmul locals| vertical |
+  w vmul orig swap v- horizontal 2e vdiv v- vertical 2e vdiv v- locals| llc |
+  orig llc horizontal vertical u v w 2e f/ camera-new
+  fdrop fdrop
 ;
 
 \ Free a camera
@@ -61,12 +71,20 @@ end-structure
   cr
 ;
 
-\ Get ray from camera at (u,v)
-: get-ray ( c -- ray ) ( u v -- )
+\ Get ray from camera at (s, t)
+: get-ray ( c rng -- ray rng ) ( s t -- )
+  >r
   locals| cam |
+  cam lens-radius f@ r> vrand-in-unit-disk swap >r vmul locals| rd |
+  cam cam-u rd vx f@ vmul
+  cam cam-v rd vy f@ vmul
+  v+ locals| offset |
+
+  cam origin offset v+
   cam lower-left-corner
+  cam horizontal fswap vmul v+
   cam vertical vmul v+
-  cam horizontal vmul v+
-  cam cam-origin v-
-  cam cam-origin swap ray-new
+  cam origin v-
+  offset v-
+  ray-new r>
 ;

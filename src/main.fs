@@ -5,8 +5,8 @@ include ./ray.fs
 include ./sphere.fs
 include ./list.fs
 include ./hit.fs
-include ./camera.fs
 include ./random.fs
+include ./camera.fs
 include ./material.fs
 
 variable rng
@@ -54,14 +54,14 @@ variable rng
   utime drop rng !
   locals| h w |
   w h * 3 * allocate throw locals| addr |
-  -2e 2e 1e vec3-new 0e 0e -1e vec3-new 0e 1e 0e vec3-new pi 2e f/ 16e 9e f/ make-camera locals| cam |
-  3.555555e 0e 0e vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
-  0e 2e 0e vec3-new locals| vertical |
-  0e 0e 0e vec3-new locals| orig |
-  horizontal 2e vdiv locals| llc-h |
-  vertical 2e vdiv locals| llc-v |
-  0e 0e 1e vec3-new locals| llc-f |
-  orig llc-h v- llc-v v- llc-f v- locals| lower-left-corner |
+  3e 3e 2e vec3-new \ lookfrom
+  0e 0e -1e vec3-new \ lookat
+  0e 1e 0e vec3-new \ vup
+  pi 9e f/ \ vfov
+  16e 9e f/ \ aspect ratio
+  2e \ aperture
+  2 pick 2 pick v- vlength \ dist to focus
+  make-camera locals| cam |
 
   0 locals| head |
   0e 0e -1e vec3-new 0.5e lambertian 0.1e 0.2e 0.5e color-new 0e 0e material-new sphere-new head push-front to head
@@ -76,7 +76,7 @@ variable rng
       100 0 do
         j s>f rng @ frand rng ! f+ w 1- s>f f/
         k s>f rng @ frand rng ! f+ h 1- s>f f/
-        cam get-ray
+        cam rng @ get-ray rng !
         head 50 ray-color
         pix v+ to pix
       loop

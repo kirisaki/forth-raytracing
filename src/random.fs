@@ -59,6 +59,19 @@
   then
 ;
 
+\ Fenerate a random vector in unit disk
+: vrand-in-unit-disk ( u -- u v-addr )
+  begin
+    -1e 1e frand-range
+    -1e 1e frand-range
+    0e vec3-new
+    dup vlength2 1e f< if
+      exit
+    then
+    drop
+  again
+;
+
 : test-random ( -- )
   cr ." ---test-random" cr
   ." 10 random numbers: " cr
@@ -105,6 +118,22 @@
   1234567890
   5 0 do
     vrand-in-unit-sphere .v
+  loop
+  drop
+  cr
+
+  ." 5 random vectors in hemisphere (normal = (0,1,0)): " cr
+  1234567890
+  5 0 do
+    0e 1e 0e vec3-new swap vrand-in-hemisphere .v
+  loop
+  drop
+  cr
+
+  ." 5 random vectors in unit disk: " cr
+  1234567890
+  5 0 do
+    vrand-in-unit-disk .v
   loop
   drop
   cr
