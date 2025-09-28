@@ -16,6 +16,7 @@ variable rng
   hit-record-empty locals| rec |
   d 0<= if
     0e 0e 0e vec3-new
+    rec free throw
     exit
   then
   0.001e inf
@@ -23,11 +24,13 @@ variable rng
     rec rec-material ray rec rng @ scatter rng ! 
     if locals| att out-ray |
       \ scattered
+      rec free throw
       out-ray head d 1- recurse att vhprod 
       out-ray free throw
     else
       \ absorb
       free throw drop 0e 0e 0e vec3-new 
+      rec free throw
     then
   else
     \ background
@@ -39,8 +42,8 @@ variable rng
     0.5e 0.7e 1.0e vec3-new dup
     vmul swap free throw
     over over v+ -rot free throw free throw
+    rec free throw
   then
-  rec free throw
 ;
 
 : pixel-color ( color samples -- u u u )
@@ -81,7 +84,7 @@ variable rng
       0.2e
       i s>f 0.9e rng @ frand rng ! f* f+
       vec3-new locals| center |
-      rng @ vrand swap  vrand swap rng ! over over vhprod locals| albedo |
+      rng @ vrand swap vrand swap rng ! over over vhprod locals| albedo |
       free throw free throw
 
       center 4e 0.2e 0e vec3-new v- vlength 0.9e f> if
@@ -96,14 +99,19 @@ variable rng
           \ glass
           center 0.2e dielectric 1e 1e 1e color-new 0e 1.5e material-new sphere-new head push-front to head
         then then
+        center free throw
+        albedo free throw
       then
     loop
   loop
 
+  0e 0e 0e vec3-new locals| pix |
   h 1- 0 swap do
     i .
     w 0 do
-      0e 0e 0e vec3-new locals| pix |
+      0e pix vx f!
+      0e pix vy f!
+      0e pix vz f!
       100 0 do
         j s>f rng @ frand rng ! f+ w 1- s>f f/
         k s>f rng @ frand rng ! f+ h 1- s>f f/

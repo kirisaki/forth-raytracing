@@ -75,9 +75,13 @@ end-structure
 
   cam origin offset v+
   cam lower-left-corner
+
   cam horizontal fswap vmul v+
   dup cam vertical vmul v+ swap free throw
   dup cam origin v- swap free throw
   dup offset v- swap free throw
   ray-new r>
+
+  rd free throw
+  offset free throw
 ;

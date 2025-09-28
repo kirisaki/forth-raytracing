@@ -85,7 +85,7 @@ end-structure
         mat @ ref-index f@ 
       then
       fdup
-      ray direction vunit -1e vmul rec normal @ vdot 1e fmin \ etai etai cos
+      ray direction vunit dup -1e vmul swap free throw dup rec normal @ vdot free throw 1e fmin \ etai etai cos
       fdup fdup f* 1e fswap f- fabs fsqrt \ etai etai cos sin
       2 fpick f* 1e f> if \ etai etai cos
         \ total internal reflection
