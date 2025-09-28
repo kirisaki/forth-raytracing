@@ -54,20 +54,49 @@ variable rng
   utime drop rng !
   locals| h w |
   w h * 3 * allocate throw locals| addr |
-  3e 3e 2e vec3-new \ lookfrom
-  0e 0e -1e vec3-new \ lookat
+  13e 2e 3e vec3-new \ lookfrom
+  0e 0e 0e vec3-new \ lookat
   0e 1e 0e vec3-new \ vup
   pi 9e f/ \ vfov
   16e 9e f/ \ aspect ratio
-  2e \ aperture
-  2 pick 2 pick v- vlength \ dist to focus
+  0.1e \ aperture
+  10e \ dist to focus
   make-camera locals| cam |
 
   0 locals| head |
-  0e 0e -1e vec3-new 0.5e lambertian 0.1e 0.2e 0.5e color-new 0e 0e material-new sphere-new head push-front to head
-  0e -100.5e -1e vec3-new 100e lambertian 0.8e 0.8e 0e color-new 0e 0e material-new sphere-new head push-front to head
-  1e 0e -1e vec3-new 0.5e metal 0.8e 0.6e 0.2e color-new 0e 0e material-new sphere-new head push-front to head
-  -1e 0e -1e vec3-new 0.5e dielectric 0e 0e 0e color-new 0e 1.5e material-new sphere-new head push-front to head
+  \ ground
+  0e -1000e 0e vec3-new 1000e lambertian 0.5e 0.5e 0.5e color-new 0e 0e material-new sphere-new head push-front to head
+
+  \ three spheres
+  0e 1e 0e vec3-new 1e dielectric 0e 0e 0e color-new 0e 1.5e material-new sphere-new head push-front to head
+  -4e 1e 0e vec3-new 1e lambertian 0.4e 0.2e 0.1e color-new 0e 0e material-new sphere-new head push-front to head
+  4e 1e 0e vec3-new 1e metal 0.7e 0.6e 0.5e color-new 0e 0e material-new sphere-new head push-front to head
+
+  \ random small spheres
+  \ 11 -11 do
+  \   11 -11 do
+  \     j s>f 0.9e rng @ frand rng ! f* f+
+  \     0.2e
+  \     i s>f 0.9e rng @ frand rng ! f* f+
+  \     vec3-new locals| center |
+  \     rng @ vrand swap  vrand swap rng ! over over vhprod locals| albedo |
+  \     free throw free throw
+
+  \     center 4e 0.2e 0e vec3-new v- vlength 0.9e f> if
+  \       rng @ frand rng ! fdup 0.8e f< if
+  \         \ diffuse
+  \         center 0.2e lambertian albedo 0e 0e material-new sphere-new head push-front to head
+  \         fdrop
+  \       else 0.95e f< if
+  \         \ metal
+  \         center 0.2e metal albedo rng @ frand rng ! 0e material-new sphere-new head push-front to head
+  \       else 
+  \         \ glass
+  \         center 0.2e dielectric 1e 1e 1e color-new 0e 1.5e material-new sphere-new head push-front to head
+  \       then then
+  \     then
+  \   loop
+  \ loop
 
   h 1- 0 swap do
     i .
@@ -92,6 +121,7 @@ variable rng
   w h
   addr
 ;
+
 192 108 generate-pnm s" test1.pnm" write-pnm
 \ 384 216 generate-pnm s" test1.pnm" write-pnm
 

@@ -41,7 +41,7 @@ end-structure
   locals| vup lookat orig |
   3 fpick 2e f/ ftan 
   2e f*
-  fdup 3 fpick f* \ fov aspect aperture focus-dist height width
+  fdup 4 fpick f* \ fov aspect aperture focus-dist height width
 
   orig lookat v- vunit \ w
   dup vup swap vcross vunit \ w u
