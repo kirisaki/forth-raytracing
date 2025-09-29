@@ -10,4 +10,4 @@ GFORTH       := gforth
 all: run
 
 run:
-	@$(GFORTH) $(ENTRY)
+	@$(GFORTH) $(ENTRY) < /dev/null
