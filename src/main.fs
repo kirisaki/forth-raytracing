@@ -1,4 +1,5 @@
 include ./util.fs
+include ./arena.fs
 include ./pnm.fs
 include ./vector.fs
 include ./list.fs
@@ -33,7 +34,9 @@ variable rng
   \ test-list
   \ test-random
   \ test-clamp
+  test-arena
 ;
+
 
 main
 ." done." cr
