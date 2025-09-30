@@ -14,7 +14,12 @@ end-structure
 : vec3-new ( fx fy fz -- addr )
   vec3-empty >r
   r@ vz f!  r@ vy f!  r@ vx f!
-  r> ;
+  r>
+;
+
+\ New temporary vector
+: temp-vec| ( "name" -- )
+  vec3-empty postpone locals| ; immediate
 
 ' vec3-new alias color-new
 
@@ -32,9 +37,9 @@ end-structure
 ;
 
 \ add vectors
-: v+ ( v1-addr v2-addr -- v3-addr )
+: v+ ( v1-addr v2-addr out-addr -- v3-addr )
+  -rot
   locals| v2 v1 |
-  vec3-empty
 
   v1 vx f@
   v2 vx f@
@@ -49,13 +54,13 @@ end-structure
   v1 vz f@
   v2 vz f@
   f+
-  dup vz f!
+  vz f!
 ;
 
 \ subtract vectors
-: v- ( v1-addr v2-addr -- v3-addr )
+: v- ( v1-addr v2-addr out-addr -- )
+  -rot
   locals| v2 v1 |
-  vec3-empty
 
   v1 vx f@
   v2 vx f@
@@ -70,22 +75,22 @@ end-structure
   v1 vz f@
   v2 vz f@
   f-
-  dup vz f!
+  vz f!
 ;
 
 \ Multipuly vector by vector (Hadamard product)
-: vhprod ( v1-addr v2-addr -- v3-addr )
+: vhprod ( v1-addr v2-addr out-addr -- )
+  -rot
   locals| v2 v1 |
-  vec3-empty
   v1 vx f@ v2 vx f@ f* dup vx f!
   v1 vy f@ v2 vy f@ f* dup vy f!
-  v1 vz f@ v2 vz f@ f* dup vz f!
+  v1 vz f@ v2 vz f@ f* vz f!
 ;
 
 \ multiply vector by scalar
-: vmul ( v1-addr -- v2-addr ) ( f -- )
+: vmul ( v1-addr out-addr -- ) ( f -- )
+  swap
   locals| v |
-  vec3-empty
 
   fdup
   v vx f@
@@ -99,17 +104,17 @@ end-structure
 
   v vz f@
   f*
-  dup vz f!
+  vz f!
 ;
 
 \ divide vector by scalar
-: vdiv ( v1-addr -- v2-addr ) ( f -- )
+: vdiv ( v1-addr out-addr -- ) ( f -- )
   1e fswap f/
   vmul
 ;
   
 \ dot product
-: vdot ( v1-addr v2-addr -- f )
+: vdot ( v1-addr v2-addr -- ) ( -- f )
   locals| v2 v1 |
   v1 vx f@ v2 vx f@ f*
   v1 vy f@ v2 vy f@ f* f+
@@ -117,9 +122,9 @@ end-structure
 ;
 
 \ cross product
-: vcross ( v1-addr v2-addr -- v3-addr )
+: vcross ( v1-addr v2-addr out-addr -- )
+  -rot
   locals| v2 v1 |
-  vec3-empty
 
   v1 vy f@ v2 vz f@ f*
   v1 vz f@ v2 vy f@ f* f-
@@ -127,7 +132,7 @@ end-structure
   v1 vx f@ v2 vz f@ f* f-
   v1 vx f@ v2 vy f@ f*
   v1 vy f@ v2 vx f@ f* f-
-  dup vz f! dup vy f! dup vx f!
+  dup vz f! dup vy f! vx f!
 ;
 
 \ length
@@ -147,30 +152,16 @@ end-structure
 ;
 
 \ unit vector
-: vunit ( v1-addr -- v2-addr )
-  dup vlength fdup 0e f= if
+: vunit ( v1-addr v2-addr -- )
+  over vlength fdup 0e f= if
     fdrop 1e
   then
-    vdiv
-;
-
-\ Reflect vector v about normal n
-: vreflect ( uv n -- v )
-  locals| n v |
-  v n vdot 2e f* n vmul dup v swap v- swap free throw
-;
-
-\ Refract vector uv with normal n and refraction ratio etai_over_etat
-: vrefract ( uv n -- refracted ) ( etai_over_etat -- )
-  locals| n uv |
-  uv n vdot fnegate 1e fmin
-  n vmul dup uv v+ swap free throw dup vmul swap free throw
-  dup vlength2 1e fswap f- fabs fsqrt fnegate n vmul over v+ swap free throw
+  vdiv
 ;
 
 : test-vector ( -- )
   1e 2e 3e   vec3-new 
-  10e 20e 30e vec3-new
+  1e 1e 5e vec3-new
   vec3% allocate throw
   locals| c b a |
 
@@ -180,27 +171,32 @@ end-structure
   b .v cr
   
   s" v+" type cr
-  a b v+
-  .v cr
+  a b c v+
+  c .v cr
 
   s" v-" type cr
-  a b v-
-  .v cr
+  a b c v-
+  c .v cr
 
   s" vmul" type cr
-  a 2e vmul
-  .v cr
+  a c 2e vmul
+  c .v cr
 
   s" vdiv" type cr
-  a 2e vdiv
-  .v cr
+  a c 2e vdiv
+  c .v cr
 
   s" vdot" type cr
   a b vdot f. cr
 
+
   s" vcross" type cr
-  a b vcross
-  .v cr
+  a b c vcross
+  c .v cr
+
+  s" vhadamard" type cr
+  a b c vhprod
+  c .v cr
 
   s" vlength" type cr
   a vlength f. cr
@@ -209,7 +205,9 @@ end-structure
   a vlength2 f. cr
 
   s" vunit" type cr
-  a vunit
-  .v cr
+  a c vunit
+  c .v cr
   cr
+
+  c free throw
 ;

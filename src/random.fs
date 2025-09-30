@@ -23,54 +23,57 @@
 ;
 
 \ Generate a random vector
-: vrand ( u -- u v-addr )
-  frand frand frand vec3-new
+: vrand ( u v-addr -- u )
+  swap frand frand frand 
+  swap dup vz f! dup vy f! vx f!
 ;
 
 \ Generate a random vector in [min, max)]
-: vrand-range ( u -- u v-addr ) ( min max -- )
-  fover fover 
+: vrand-range ( u v-addr -- u ) ( min max -- )
+  swap fover fover 
   frand-range
   2 fpick 2 fpick  
   frand-range
   3 fpick 3 fpick
-  frand-range vec3-new
+  frand-range
+  swap dup vz f! dup vy f! vx f!
   fdrop fdrop
 ;
 
 \ Generate a random vector in unit sphere
-: vrand-in-unit-sphere ( u -- u v-addr )
+: vrand-in-unit-sphere ( u v-addr -- u )
+  swap >r
   begin
-    -1e 1e vrand-range
+    -1e 1e dup r> swap vrand-range >r
     dup vlength2 1e f< if
+      drop r>
       exit
     then
-    drop
   again
 ;
 
-\ Generate a random vector in hemisphere
-: vrand-in-hemisphere ( normal-addr u -- u v-addr )
-  swap
-  locals| normal |
-  vrand-in-unit-sphere
-  dup normal vdot 0e f< if
-    -1e vmul
-  then
-;
+\ \ Generate a random vector in hemisphere
+\ : vrand-in-hemisphere ( normal-addr u v-addr -- u )
+\   >r
+\   temp-vec| r |
+\   r vrand-in-unit-sphere
+\   r normal vdot 0e f< if
+\     -1e r >r vmul
+\   then
+\ ;
 
-\ Fenerate a random vector in unit disk
-: vrand-in-unit-disk ( u -- u v-addr )
-  begin
-    -1e 1e frand-range
-    -1e 1e frand-range
-    0e vec3-new
-    dup vlength2 1e f< if
-      exit
-    then
-    drop
-  again
-;
+\ \ Fenerate a random vector in unit disk
+\ : vrand-in-unit-disk ( u v-addr -- u )
+\   begin
+\     -1e 1e frand-range
+\     -1e 1e frand-range
+\     0e vec3-new
+\     dup vlength2 1e f< if
+\       exit
+\     then
+\     drop
+\   again
+\ ;
 
 : test-random ( -- )
   cr ." ---test-random" cr
@@ -98,10 +101,12 @@
   drop
   cr cr
 
+  
+  vec3% allocate throw locals| v |
   ." 5 random vectors in [0.0, 1.0): " cr
   1234567890
   5 0 do
-    vrand .v
+    v vrand v .v
   loop
   drop
   cr cr
@@ -109,32 +114,20 @@
   ." 5 random vectors in [-1.0, 1.0): " cr
   1234567890
   5 0 do
-    -1.0e 1.0e vrand-range .v
+    -1.0e 1.0e v vrand-range v .v
   loop
   drop
   cr cr
 
+  v .v cr
   ." 5 random vectors in unit sphere: " cr
   1234567890
   5 0 do
-    vrand-in-unit-sphere .v
+    v vrand-in-unit-sphere v .v
   loop
   drop
-  cr
+  cr cr
 
-  ." 5 random vectors in hemisphere (normal = (0,1,0)): " cr
-  1234567890
-  5 0 do
-    0e 1e 0e vec3-new swap vrand-in-hemisphere .v
-  loop
-  drop
-  cr
-
-  ." 5 random vectors in unit disk: " cr
-  1234567890
-  5 0 do
-    vrand-in-unit-disk .v
-  loop
-  drop
+  v free throw
   cr
 ;

@@ -41,6 +41,18 @@ end-structure
   drop r> drop
 ;
 
+\ Free all nodes in the list
+: free-list  ( head -- )
+  begin
+    dup 0<>
+  while
+    >r
+    next-node @
+    r@ free throw
+    r> drop
+  repeat
+  drop
+;
 
 : test-list ( -- )
   cr ." ---test-list" cr
@@ -57,7 +69,6 @@ end-structure
   1 2 3  head  [: .s cr swap >r >r dup 2over rot r> + + + . r> ;] foreach 3 0 do drop loop cr
   head pop-front   ( h' x | 0 0 )
   2dup 0= swap 0= and if 2drop ." pop-front: EMPTY" cr  else swap to head ." pop-front: " . cr then
-
   head pop-front
   2dup 0= swap 0= and if 2drop ." pop-front: EMPTY" cr  else swap to head ." pop-front: " . cr then
 
@@ -68,5 +79,8 @@ end-structure
   2dup 0= swap 0= and if 2drop ." pop-front (empty): EMPTY" cr
                    else swap to head ." pop-front (error): " . cr then
 
+  head free-list
+
   cr
+  drop drop drop drop
 ;
