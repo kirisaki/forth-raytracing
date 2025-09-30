@@ -34,6 +34,10 @@ end-structure
   p pool-free
 ;
 
+\ Convert ray into color vector
+: ray-color ( ray-addr out-addr pool -- )
+;
+
 : test-ray ( -- )
   cr ." ---test-ray" cr
   1024 arena-create locals| arena |

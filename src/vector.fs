@@ -157,6 +157,46 @@ end-structure
   vdiv
 ;
 
+\ Add vectors in place (v1 += v2)
+: v+= ( v1-addr v2-addr -- )
+  locals| v2 v1 |
+
+  v1 vx f@ v2 vx f@ f+ v2 vx f!
+  v1 vy f@ v2 vy f@ f+ v2 vy f!
+  v1 vz f@ v2 vz f@ f+  v2 vz f!
+;
+
+\ Subtract vectors in place (v1 -= v2)
+: v-= ( v1-addr v2-addr -- )
+  locals| v2 v1 |
+
+  v1 vx f@ v2 vx f@ f- v2 vx f!
+  v1 vy f@ v2 vy f@ f- v2 vy f!
+  v1 vz f@ v2 vz f@ f- v2 vz f!
+ ;
+
+\ Multiply vector by scalar in place (v1 *= f)
+: vmul= ( v1-addr -- ) ( f -- )
+  dup fdup vx f@ f* dup vx f!
+  dup fdup vy f@ f* dup vy f!
+  dup vz f@ f* vz f!
+;
+
+\ Divide vector by scalar in place (v1 /= f)
+: vdiv= ( v1-addr -- ) ( f -- )
+  1e fswap f/
+  vmul=
+;
+
+\ Unit vector in place (v1 = unit(v1))
+: vunit= ( v1-addr -- )
+  dup vlength fdup 0e f= if
+    fdrop 1e
+  then
+  vdiv=
+;
+
+\ Tests
 : test-vector ( -- )
   1024 arena-create locals| arena |
   arena vec3-pool-create locals| vp |
@@ -210,6 +250,26 @@ end-structure
   c .v cr
   cr
 
-  vp pool-free
+  s" v+=" type cr
+  a b v+=
+  b .v cr
+  cr
+
+  s" v-=" type cr
+  a b v-=
+  b .v cr
+  cr
+  
+  s" vmul=" type cr
+  a 2e vmul=
+  a .v cr
+  cr
+
+  s" vdiv=" type cr
+  a 2e vdiv=
+  a .v cr
+  cr
+
+  vp pool-destroy
   arena arena-destroy
 ;
