@@ -15,7 +15,7 @@ end-structure
     ." Error: element size must be >= " 1 cells . ." bytes" cr
     0
   else
-    pool% allocate throw dup locals| pool |
+    pool% allocate throw locals| pool |
     arena pool p-arena !
     elem pool p-elem !
     align pool p-align !

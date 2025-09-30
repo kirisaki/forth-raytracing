@@ -39,7 +39,7 @@ variable rng
   \ test-clamp
   \ test-arena
   \ test-pool
-  test-ray
+  \ test-ray
 ;
 
 

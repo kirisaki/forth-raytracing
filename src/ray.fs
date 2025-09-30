@@ -10,16 +10,17 @@ end-structure
 
 \ Create a new ray
 : ray-new ( origin direction pool -- ray-addr )
-  pool-alloc >r
-  r@ r-direction !  r@ r-origin !
-  r>
+  locals| p d o |
+  p pool-alloc
+  dup r-origin o swap vec3-move
+  dup r-direction d swap vec3-move
 ;
 
 \ Display ray
 : .ray ( ray-addr -- )
   s" Ray:" type cr
   s" Origin: " type
-  @ dup r-origin .v cr
+  dup r-origin .v cr
   s" Direction: " type
   r-direction .v cr
 ;
@@ -28,9 +29,9 @@ end-structure
 : ray-at ( ray-addr out-addr pool -- ) ( t -- )
   locals| p out r |
   p vec3-zero 
-  r @ r-direction over vmul
-  dup r @ r-origin out v+
-  pool-free
+  r r-direction over vmul
+  dup r r-origin out v+
+  p pool-free
 ;
 
 : test-ray ( -- )
@@ -50,7 +51,7 @@ end-structure
   r .ray
 
   \ Get point at t=2.0
-  vec3-zero vp locals| at |
+  vp vec3-zero locals| at |
   2.0e r at vp ray-at
   s" Point at t=2.0: " type
   at .v cr
