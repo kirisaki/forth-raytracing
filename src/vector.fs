@@ -4,9 +4,6 @@ begin-structure vec3%
   ffield: vz
 end-structure
 
-' vec3% alias point3%
-' vec3% alias color%
-
 \ Initialize vector pool
 : vec3-pool-create ( arena -- pool )
   vec3% 8 pool-init
@@ -19,7 +16,10 @@ end-structure
   r>
 ;
 
-' vec3-new alias color-new
+\ New zero vector
+: vec3-zero ( pool -- addr )
+  0e 0e 0e vec3-new
+;
 
 : vec3-move ( src dst -- ) vec3% move ;
 

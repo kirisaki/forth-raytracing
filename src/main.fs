@@ -3,6 +3,7 @@ include ./arena.fs
 include ./pool.fs
 include ./pnm.fs
 include ./vector.fs
+include ./ray.fs
 include ./list.fs
 include ./random.fs
 
@@ -32,12 +33,13 @@ variable rng
 
 : main
   384 216 generate-pnm s" out.ppm" write-pnm
-  test-vector
+  \ test-vector
   \ test-list
   \ test-random
   \ test-clamp
   \ test-arena
   \ test-pool
+  test-ray
 ;
 
 
