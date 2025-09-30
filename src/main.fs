@@ -1,5 +1,6 @@
 include ./util.fs
 include ./arena.fs
+include ./pool.fs
 include ./pnm.fs
 include ./vector.fs
 include ./list.fs
@@ -29,12 +30,13 @@ variable rng
 
 
 : main
-  240 135 generate-pnm s" out.ppm" write-pnm
+  \ 240 135 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
   \ test-random
   \ test-clamp
   test-arena
+  test-pool
 ;
 
 

@@ -13,11 +13,13 @@ end-structure
 
 \ Create a new arena with given size
 : arena-create ( bytes -- arena )
-  arena% allocate throw dup >r
-  over allocate throw r@ a-base !
-  r@ a-size !
-  0 r@ a-off !
-  r> ;
+  locals| bytes |
+  arena% allocate throw locals| arena |
+  bytes allocate throw arena a-base !
+  bytes arena a-size !
+  0 arena a-off !
+  arena
+;
 
 \ Destroy the arena and free all memory
 : arena-destroy ( arena -- )
@@ -30,20 +32,17 @@ end-structure
 
 \ Allocate n bytes from the arena with specified alignment
 : arena-alloc ( n align arena -- addr | 0 )
-  >r
-  r@ a-off @ over align-up   ( n align aligned_off )
-  dup 2 pick +               ( n align aligned_off end_off )
-  dup r@ a-size @ u> if
-    \ Out of memory
-    2drop 2drop r> drop 0
+  locals| arena align n |
+  arena a-off @ align align-up locals| aligned-off |
+  aligned-off n + locals| end-off |
+
+  end-off arena a-size @ u> if
+    0
   else
-    \ Success
-    nip nip                  ( aligned_off end_off )
-    r@ a-base @ 2 pick +     ( aligned_off end_off addr )
-    -rot                     ( addr aligned_off end_off )
-    swap r@ a-off !          ( addr end_off )
-    drop r> drop             ( addr )
-  then ;
+    end-off arena a-off !
+    arena a-base @ aligned-off +
+  then
+;
 
 \ Allocate n bytes with default alignment
 : arena-alloc-aligned ( n arena -- addr | 0 )
@@ -66,11 +65,10 @@ end-structure
   cr ." ---test-arena" cr
   
   \ Create 1KB arena
-  1024 arena-create dup locals| arena |
+  1024 arena-create locals| arena |
   
   ." Created 1KB arena" cr
   ." Available: " arena arena-available . ." bytes" cr cr
-  
   \ Allocate some memory
   ." Allocating 100 bytes..." cr
   100 arena arena-alloc-aligned dup locals| ptr1 |
