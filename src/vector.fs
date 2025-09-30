@@ -161,18 +161,18 @@ end-structure
 : v+= ( v1-addr v2-addr -- )
   locals| v2 v1 |
 
-  v1 vx f@ v2 vx f@ f+ v2 vx f!
-  v1 vy f@ v2 vy f@ f+ v2 vy f!
-  v1 vz f@ v2 vz f@ f+  v2 vz f!
+  v1 vx f@ v2 vx f@ f+ v1 vx f!
+  v1 vy f@ v2 vy f@ f+ v1 vy f!
+  v1 vz f@ v2 vz f@ f+ v1 vz f!
 ;
 
 \ Subtract vectors in place (v1 -= v2)
 : v-= ( v1-addr v2-addr -- )
   locals| v2 v1 |
 
-  v1 vx f@ v2 vx f@ f- v2 vx f!
-  v1 vy f@ v2 vy f@ f- v2 vy f!
-  v1 vz f@ v2 vz f@ f- v2 vz f!
+  v1 vx f@ v2 vx f@ f- v1 vx f!
+  v1 vy f@ v2 vy f@ f- v1 vy f!
+  v1 vz f@ v2 vz f@ f- v1 vz f!
  ;
 
 \ Multiply vector by scalar in place (v1 *= f)
