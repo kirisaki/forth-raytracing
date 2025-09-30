@@ -7,19 +7,17 @@ end-structure
 ' vec3% alias point3%
 ' vec3% alias color%
 
-\ New empty vector
-: vec3-empty ( -- addr ) vec3% allocate throw ;
+\ Initialize vector pool
+: vec3-pool-create ( arena -- pool )
+  vec3% 8 pool-init
+;
 
 \ New vector
-: vec3-new ( fx fy fz -- addr )
-  vec3-empty >r
+: vec3-new ( fx fy fz pool -- addr )
+  pool-alloc >r
   r@ vz f!  r@ vy f!  r@ vx f!
   r>
 ;
-
-\ New temporary vector
-: temp-vec| ( "name" -- )
-  vec3-empty postpone locals| ; immediate
 
 ' vec3-new alias color-new
 
@@ -160,9 +158,12 @@ end-structure
 ;
 
 : test-vector ( -- )
-  1e 2e 3e   vec3-new 
-  1e 1e 5e vec3-new
-  vec3% allocate throw
+  1024 arena-create locals| arena |
+  arena vec3-pool-create locals| vp |
+
+  1e 2e 3e vp vec3-new 
+  1e 1e 5e vp vec3-new
+  vp pool-alloc
   locals| c b a |
 
   s" ---vector test" type cr
@@ -209,5 +210,6 @@ end-structure
   c .v cr
   cr
 
-  c free throw
+  vp pool-free
+  arena arena-destroy
 ;

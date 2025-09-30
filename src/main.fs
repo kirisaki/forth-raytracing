@@ -12,6 +12,7 @@ variable rng
   locals| h w |
   w h * 3 * allocate throw locals| data |
   
+
   0 h 1- do
     w 0 do
       i s>f w 1- s>f f/ 255.999e f* f>s locals| r |
@@ -30,13 +31,13 @@ variable rng
 
 
 : main
-  \ 240 135 generate-pnm s" out.ppm" write-pnm
-  \ test-vector
+  384 216 generate-pnm s" out.ppm" write-pnm
+  test-vector
   \ test-list
   \ test-random
   \ test-clamp
-  test-arena
-  test-pool
+  \ test-arena
+  \ test-pool
 ;
 
 
