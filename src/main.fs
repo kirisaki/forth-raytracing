@@ -14,9 +14,20 @@ variable rng
 : ray-color ( ray-addr out-addr pool -- )
   locals| vp col ray |
   0e 0e -1e vp vec3-new locals| center |
-  center ray vp 0.5e  hit-sphere if
-    1e 0e 0e col v!
+  center ray vp 0.5e  hit-sphere fdup f0> if
+    vp vec3-zero locals| at |
+    0e 0e -1e vp vec3-new locals| b |
+    ray at vp ray-at
+    at b v-= at vunit=
+    at vx dup f@ 1e f+ f!
+    at vy dup f@ 1e f+ f!
+    at vz dup f@ 1e f+ f!
+    0.5e at vmul=
+    at col vec3-move
+    at vp pool-free
+    b vp pool-free
   else
+    fdrop
     vp vec3-zero locals| unit-dir |
     ray r-direction unit-dir vunit
     unit-dir vy f@ 1.0e f+ 2.0e f/
