@@ -34,13 +34,18 @@ begin-structure hit-record%
   field: h-front-face
 end-structure
 
+\ Initialize hit record pool
+: hit-record-pool-create ( arena -- pool )
+  hit-record% 8 pool-init
+;
+
 \ Create a new empty hit record
-: hit-record-empty ( pool -- hit-record-addr )
+: hit-record-empty ( hrp -- hit-record-addr )
   pool-alloc
   dup h-point 0e 0e 0e v!
   dup h-normal 0e 0e 0e v!
   dup h-t-val 0e f!
-  dup h-front-face swap 0 !
+  dup h-front-face 0 swap !
 ;
 
 \ Display hit record
@@ -53,7 +58,7 @@ end-structure
   s" t-value: " type
   dup h-t-val f@ f. cr
   s" Front face: " type
-  dup h-front-face @ if ." true" else ." false" then cr
+  h-front-face @ if ." true" else ." false" then cr
 ;
 
 \ Set face normal
@@ -69,24 +74,55 @@ end-structure
 ;
 
 \ Detect ray-sphere intersection
-: hit-sphere ( center ray vp -- ) ( f-radius -- f )
-  locals| vp ray center |
-  vp vec3-zero locals| oc |
-  ray r-origin center oc v- 
-  vp vec3-zero locals| dir |
-  ray r-direction dir vec3-move 
-  dir vlength2 \ r a
-  oc dir vdot \ r a b/2
-  oc vlength2 3 fpick fdup f* f- \ r a b/2 c
-  1 fpick fdup f* \ r a b/2 c (b/2)^2 
-  3 fpick 2 fpick f* \ r a b/2 c b^2 ac
-  f- \ r a b/2 c d
+: hit-sphere ( sphere ray rec vp  -- flag ) ( f-t-min f-t-max -- )
+  locals| vp rec ray s |
+  vp vec3-zero vp vec3-zero locals| oc dir |
+  ray r-origin s s-center oc v- 
+  ray r-direction dir vec3-move
+  dir vlength2 \ tmin tmax a
+  dir oc vdot \ tmin tmax a b/2
+  oc vlength2 s s-radius f@ fdup f* f- \ tmin tmax a b/2 c
+  1 fpick fdup f* \ tmin tmax a b/2 c (b/2)^2 
+  3 fpick 2 fpick f* \ tmin tmax a b/2 c (b/2)^2 ac
+  f- \ tm6in tmax a b/2 c d
   fdup f0< if
-    5 0 do fdrop loop -1e \ no hit
+    fdrop fdrop fdrop fdrop fdrop fdrop false \ no hit
   else
-    fsqrt
-    2 fpick fnegate fswap f- 3 fpick f/
-    4 0 do fdrop loop
+    fsqrt fdup \ tmin tmax a b/2 c sqrt(d) sqrt(d)
+    3 fpick fnegate fswap f- \ tmin tmax a b/2 c sqrt(d) t1
+    4 fpick f/ \ tmin tmax a b/2 c sqrt(d) t2
+    fdup fdup \ tmin tmax a b/2 c sqrt(d) t2 t2 t2
+    8 fpick fswap f< 6 fpick f< and if
+      fdup rec h-t-val f! \ tmin tmax a b/2 c sqrt(d) t2
+      vp vec3-zero locals| at |
+      ray at vp ray-at
+      at rec h-point vec3-move
+      at s s-center v-= at s s-radius f@ vdiv=
+      ray at rec hit-record-set-face-normal
+      fdrop fdrop fdrop fdrop fdrop fdrop
+      true
+      at vp pool-free
+      exit
+    then
+    fdrop \ tmin tmax a b/2 c sqrt(d)
+    fdup \ tmin tmax a b/2 c sqrt(d) sqrt(d)
+    3 fpick fnegate fswap f+ \ tmin tmax a b/2 c sqrt(d) t1
+    4 fpick f/ \ tmin tmax a b/2 c sqrt(d) t2
+    fdup fdup \ tmin tmax a b/2 c sqrt(d) t2 t2 t2
+    8 fpick fswap f< 6 fpick f< and if
+      fdup rec h-t-val f! \ tmin tmax a b/2 c sqrt(d)
+      vp vec3-zero locals| at |
+      ray at vp ray-at
+      at rec h-point vec3-move
+      at s s-center v-= at s s-radius f@ vdiv=
+      ray at rec hit-record-set-face-normal
+      fdrop fdrop fdrop fdrop fdrop fdrop
+      true
+      at vp pool-free
+      exit
+    then
+    fdrop fdrop fdrop fdrop fdrop fdrop fdrop
+    false
   then
   oc vp pool-free
   dir vp pool-free
@@ -99,6 +135,7 @@ end-structure
   arena vec3-pool-create locals| vp |
   arena ray-pool-create locals| rp |
   arena sphere-pool-create locals| sp |
+  arena hit-record-pool-create locals| hrp |
   
   \ Create center and radius
   0e 0e -1e vp vec3-new locals| center |
@@ -118,12 +155,14 @@ end-structure
 
   \ Print ray
   r .ray
-
+  
   \ Test hit-sphere
-  r center vp 0.5e hit-sphere fdup f0> if
-    s" Ray hits sphere at t=" type f. cr
+  hrp hit-record-empty locals| hr |
+  0.001e 1000e sphere r hr vp hit-sphere if
+    ." Ray hits sphere!" cr
+    hr .hit-record
   else
-    s" Ray misses sphere." type cr
+    ." Ray misses sphere." cr
   then
 
   \ Free resources
@@ -131,7 +170,18 @@ end-structure
   center vp pool-free
   o vp pool-free
   d vp pool-free
-  r rp pool-free
+  r hrp pool-free
 
+  depth 0= if
+    ." All resources freed." cr
+  else
+    ." Resource leak detected!: " .s cr
+  then
+
+  fdepth 0= if
+    ." All floating-point resources freed." cr
+  else
+    ." Floating-point resource leak detected!: " f.s cr
+  then
   cr
 ;
