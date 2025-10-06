@@ -21,7 +21,13 @@ end-structure
   0e 0e 0e vec3-new
 ;
 
+\ Copy vector
 : vec3-move ( src dst -- ) vec3% move ;
+
+\ Store vector
+: v! ( v-addr -- )  ( f f f -- ) 
+  dup vz f!  dup vy f!  vx f!
+;
 
 \ print vector
 : .v ( v -- )

@@ -4,11 +4,45 @@ include ./pool.fs
 include ./pnm.fs
 include ./vector.fs
 include ./ray.fs
+include ./sphere.fs
 include ./list.fs
 include ./random.fs
 
 variable rng
 
+\ Convert ray into color vector
+: ray-color ( ray-addr out-addr pool -- )
+  locals| vp col ray |
+  0e 0e -1e vp vec3-new locals| center |
+  center ray vp 0.5e  hit-sphere if
+    1e 0e 0e col v!
+  else
+    vp vec3-zero locals| unit-dir |
+    ray r-direction unit-dir vunit
+    unit-dir vy f@ 1.0e f+ 2.0e f/
+    fdup 1.0e fswap f- 
+
+    1e 1e 1e vp vec3-new locals| white |
+    white vmul=
+    0.5e 0.7e 1.0e vp vec3-new locals| blue |
+    blue vmul=
+    white blue v+=
+    white col vec3-move
+
+    blue vp pool-free
+    white vp pool-free
+    unit-dir vp pool-free
+  then
+  center vp pool-free
+;
+
+\ Color to a pixel
+: pixel-color ( color -- u u u )
+  locals| color |
+  color vx f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
+  color vy f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
+  color vz f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
+;
 : generate-pnm ( width height -- width height c-addr )
   locals| h w |
   w h * 3 * allocate throw locals| data |
