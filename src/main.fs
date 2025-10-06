@@ -118,6 +118,7 @@ variable rng
   \ test-arena
   \ test-pool
   \ test-ray
+  test-sphere
 ;
 
 

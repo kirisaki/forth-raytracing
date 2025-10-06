@@ -29,6 +29,13 @@ end-structure
   dup vz f!  dup vy f!  vx f!
 ;
 
+\ Load vector
+: v@ ( v-addr -- ) ( -- f f f )
+  dup vz f@ f.
+  dup vy f@ f.
+  vx f@ f.
+;
+
 \ print vector
 : .v ( v -- )
   ." ("
