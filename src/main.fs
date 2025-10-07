@@ -112,13 +112,13 @@ variable rng
 : main
   \ 384 216 generate-pnm s" out.ppm" write-pnm
   \ test-vector
-  \ test-list
+  test-list
   \ test-random
   \ test-clamp
   \ test-arena
   \ test-pool
   \ test-ray
-  test-sphere
+  \ test-sphere
 ;
 
 
