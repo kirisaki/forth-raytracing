@@ -8,6 +8,7 @@ include ./sphere.fs
 include ./list.fs
 include ./hit.fs
 include ./random.fs
+include ./camera.fs
 
 variable rng
 
@@ -51,7 +52,7 @@ variable rng
   locals| h w |
   w h * 3 * allocate throw locals| data |
 
-  50 1024 * arena-create locals| arena |
+  20 1024 * arena-create locals| arena |
   arena vec3-pool-create locals| vp |
   arena ray-pool-create locals| rp |
   arena sphere-pool-create locals| sp |
@@ -108,7 +109,7 @@ variable rng
 
 
 : main
-  384 216 generate-pnm s" out.ppm" write-pnm
+  \ 384 216 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
   \ test-random
@@ -118,6 +119,7 @@ variable rng
   \ test-ray
   \ test-sphere
   \ test-hit
+  test-camera
 ;
 
 
