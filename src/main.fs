@@ -52,13 +52,10 @@ variable rng
   w h * 3 * allocate throw locals| data |
 
   50 1024 * arena-create locals| arena |
-  1 1024 * arena-create locals| arena2 |
-  1 1024 * arena-create locals| arena3 |
-  1 1024 * arena-create locals| arena4 |
   arena vec3-pool-create locals| vp |
-  arena2 ray-pool-create locals| rp |
-  arena3 sphere-pool-create locals| sp |
-  arena4 hit-record-pool-create locals| hrp |
+  arena ray-pool-create locals| rp |
+  arena sphere-pool-create locals| sp |
+  arena hit-record-pool-create locals| hrp |
 
   0 locals| head |
   0e 0e -1e vp vec3-new 0.5e sp sphere-new head sp push-front to head
