@@ -172,16 +172,5 @@ end-structure
   d vp pool-free
   r hrp pool-free
 
-  depth 0= if
-    ." All resources freed." cr
-  else
-    ." Resource leak detected!: " .s cr
-  then
-
-  fdepth 0= if
-    ." All floating-point resources freed." cr
-  else
-    ." Floating-point resource leak detected!: " f.s cr
-  then
-  cr
+  check-stacks
 ;

@@ -6,6 +6,7 @@ include ./vector.fs
 include ./ray.fs
 include ./sphere.fs
 include ./list.fs
+include ./hit.fs
 include ./random.fs
 
 variable rng
@@ -112,13 +113,14 @@ variable rng
 : main
   \ 384 216 generate-pnm s" out.ppm" write-pnm
   \ test-vector
-  test-list
+  \ test-list
   \ test-random
   \ test-clamp
   \ test-arena
   \ test-pool
   \ test-ray
   \ test-sphere
+  test-hit
 ;
 
 

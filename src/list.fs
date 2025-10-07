@@ -31,6 +31,7 @@ end-structure
   h' swap
 ;
 
+\ Iterate over list, calling xt for each value
 : foreach  ( head xt -- )
   locals| xt |
   begin
@@ -85,17 +86,5 @@ end-structure
   head pool free-list
   arena arena-destroy
 
-  depth 0= if
-    ." All resources freed." cr
-  else
-    ." Resource leak detected!: " .s cr
-  then
-
-  fdepth 0= if
-    ." All floating-point resources freed." cr
-  else
-    ." Floating-point resource leak detected!: " f.s cr
-  then
-  
-  cr
+  check-stacks
 ;
