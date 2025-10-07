@@ -22,7 +22,11 @@ end-structure
 ;
 
 \ Copy vector
-: vec3-move ( src dst -- ) vec3% move ;
+: vec3-move ( src dst -- ) 
+  over vx f@ dup vx f!
+  over vy f@ dup vy f!
+  swap vz f@ vz f!
+;
 
 \ Store vector
 : v! ( v-addr -- )  ( f f f -- ) 
@@ -281,6 +285,12 @@ end-structure
   s" vdiv=" type cr
   a 2e vdiv=
   a .v cr
+  cr
+
+  s" vec3-move" type cr
+  a c vec3-move
+  a .v cr
+  c .v cr
   cr
 
   vp pool-destroy

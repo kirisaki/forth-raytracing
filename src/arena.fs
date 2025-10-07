@@ -11,6 +11,15 @@ begin-structure arena%
   field: a-off    \ used offset (bytes)
 end-structure
 
+\ Display arena info
+: .arena ( arena -- )
+  cr ." Arena Info:" cr
+  ." Base address: " dup a-base @ . cr
+  ." Total size: " dup a-size @ . ." bytes" cr
+  ." Used offset: " dup a-off @ . ." bytes" cr
+  ." Available: " dup a-size @ swap a-off @ - . ." bytes" cr
+;
+
 \ Create a new arena with given size
 : arena-create ( bytes -- arena )
   locals| bytes |

@@ -25,6 +25,12 @@ end-structure
   r-direction .v cr
 ;
 
+\ Copy ray
+: ray-move ( src dst -- )
+  over r-origin over r-origin vec3-move
+  swap r-direction swap r-direction vec3-move
+;
+
 \ Get point along ray at parameter t
 : ray-at ( ray-addr out-addr pool -- ) ( t -- )
   locals| p out r |

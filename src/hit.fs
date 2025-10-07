@@ -10,16 +10,16 @@
   vp
   head
   [: ( ray hit-anything rec hrp vp sphere -- ) ( tmin tmax -- )
-    fover fover
-    locals| sphere vp hrp rec hit-anything ray |
+    fover fover 
+    locals| sphere vp hrp rec hit-anything r |
     hrp hit-record-empty locals| temp-rec |
-    ray hit-anything rec hrp vp \ For next iteration
-    sphere ray temp-rec vp hit-sphere if
+    sphere r temp-rec vp hit-sphere if
       true hit-anything !
       fdrop temp-rec h-t-val f@
-      temp-rec rec hit-record% move
+      temp-rec rec hit-record-move
     then
     temp-rec hrp pool-free
+    r hit-anything rec hrp vp \ For next iteration
   ;] foreach
   2drop 2drop drop
   fdrop fdrop 
@@ -49,7 +49,6 @@
   0e 0e 0e vp vec3-new locals| origin |
   0e 0e -1e vp vec3-new locals| direction |
   origin direction rp ray-new locals| ray |
-
   \ Create hit record
   hrp hit-record-empty locals| hr |
 

@@ -12,23 +12,15 @@ include ./random.fs
 variable rng
 
 \ Convert ray into color vector
-: ray-color ( ray-addr out-addr pool -- )
-  locals| vp col ray |
-  0e 0e -1e vp vec3-new locals| center |
-  center ray vp 0.5e  hit-sphere fdup f0> if
-    vp vec3-zero locals| at |
-    0e 0e -1e vp vec3-new locals| b |
-    ray at vp ray-at
-    at b v-= at vunit=
-    at vx dup f@ 1e f+ f!
-    at vy dup f@ 1e f+ f!
-    at vz dup f@ 1e f+ f!
-    0.5e at vmul=
-    at col vec3-move
-    at vp pool-free
-    b vp pool-free
+: ray-color ( ray-addr head out-addr vp hrp sp -- )
+  locals| sp hrp vp col head ray |
+  hrp hit-record-empty locals| rec |
+  0e inf
+  ray head rec hrp vp hit if
+    1e 1e 1e col v!
+    col rec h-normal v+=
+    col 2e vdiv=
   else
-    fdrop
     vp vec3-zero locals| unit-dir |
     ray r-direction unit-dir vunit
     unit-dir vy f@ 1.0e f+ 2.0e f/
@@ -45,7 +37,7 @@ variable rng
     white vp pool-free
     unit-dir vp pool-free
   then
-  center vp pool-free
+  rec hrp pool-free
 ;
 
 \ Color to a pixel
@@ -59,10 +51,19 @@ variable rng
   locals| h w |
   w h * 3 * allocate throw locals| data |
 
-  30 1024 * arena-create locals| arena |
+  50 1024 * arena-create locals| arena |
+  1 1024 * arena-create locals| arena2 |
+  1 1024 * arena-create locals| arena3 |
+  1 1024 * arena-create locals| arena4 |
   arena vec3-pool-create locals| vp |
-  arena ray-pool-create locals| rp |
-  
+  arena2 ray-pool-create locals| rp |
+  arena3 sphere-pool-create locals| sp |
+  arena4 hit-record-pool-create locals| hrp |
+
+  0 locals| head |
+  0e 0e -1e vp vec3-new 0.5e sp sphere-new head sp push-front to head
+  0e -100.5e -1e vp vec3-new 100e sp sphere-new head sp push-front to head
+
   3.555555e 0e 0e vp vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
   0e 2e 0e vp vec3-new locals| vertical |
   0e 0e 0e vp vec3-new locals| orig |
@@ -78,8 +79,8 @@ variable rng
 
   arena arena-mark locals| mark |
   orig orig rp ray-new locals| ray |  
-      vp vec3-zero vp vec3-zero vp vec3-zero vp vec3-zero 
-      locals| dir uh vv col |
+  vp vec3-zero vp vec3-zero vp vec3-zero vp vec3-zero 
+  locals| dir uh vv col |
   0 h 1- do
     w 0 do
       i s>f w 1- s>f f/ 
@@ -92,9 +93,8 @@ variable rng
       dir vv v+=
       dir orig v-=
       dir ray r-direction vec3-move
-      ray col vp ray-color
+      ray head col vp hrp sp ray-color
       col pixel-color locals| b g r |
-      \ r . g . b . s"  - " type
 
       h 1- j - w * i + 3 * data + 
       r over c!
@@ -111,7 +111,7 @@ variable rng
 
 
 : main
-  \ 384 216 generate-pnm s" out.ppm" write-pnm
+  384 216 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
   \ test-random
@@ -120,7 +120,7 @@ variable rng
   \ test-pool
   \ test-ray
   \ test-sphere
-  test-hit
+  \ test-hit
 ;
 
 

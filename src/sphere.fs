@@ -61,6 +61,14 @@ end-structure
   h-front-face @ if ." true" else ." false" then cr
 ;
 
+\ Copy hit record
+: hit-record-move ( src dst -- )
+  over h-point over h-point vec3-move
+  over h-normal over h-normal vec3-move
+  over h-t-val f@ dup h-t-val f!
+  swap h-front-face @ swap h-front-face !
+;
+
 \ Set face normal
 : hit-record-set-face-normal ( ray outward rec -- )
   locals| rec outward ray |
@@ -76,15 +84,18 @@ end-structure
 \ Detect ray-sphere intersection
 : hit-sphere ( sphere ray rec vp  -- flag ) ( f-t-min f-t-max -- )
   locals| vp rec ray s |
-  vp vec3-zero vp vec3-zero locals| oc dir |
+  vp vec3-zero locals| oc |
+  vp vec3-zero locals| dir |
   ray r-origin s s-center oc v- 
   ray r-direction dir vec3-move
-  dir vlength2 \ tmin tmax a
+  dir vlength2  \ tmin tmax a
   dir oc vdot \ tmin tmax a b/2
   oc vlength2 s s-radius f@ fdup f* f- \ tmin tmax a b/2 c
   1 fpick fdup f* \ tmin tmax a b/2 c (b/2)^2 
   3 fpick 2 fpick f* \ tmin tmax a b/2 c (b/2)^2 ac
   f- \ tm6in tmax a b/2 c d
+  oc vp pool-free
+  dir vp pool-free
   fdup f0< if
     fdrop fdrop fdrop fdrop fdrop fdrop false \ no hit
   else
@@ -124,8 +135,6 @@ end-structure
     fdrop fdrop fdrop fdrop fdrop fdrop fdrop
     false
   then
-  oc vp pool-free
-  dir vp pool-free
 ;
 
 \ Tests

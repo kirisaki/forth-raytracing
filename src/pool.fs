@@ -6,6 +6,15 @@ begin-structure pool%
   field: p-free    \ free-list head (addr|0)
 end-structure
 
+\ Display pool info
+: .pool ( pool -- )
+  cr ." Pool Info:" cr
+  ." Element size: " dup p-elem @ . ." bytes" cr
+  ." Alignment: " dup p-align @ . ." bytes" cr
+  ." Backing arena: " dup p-arena @ . cr
+  ." Free list head: " dup p-free @ . cr
+;
+
 \ Create a new pool backed by an arena
 \ Note: elem-size must be >= 1 cells for free-list links
 : pool-init ( arena elem-size align -- pool )
