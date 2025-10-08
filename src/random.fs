@@ -59,6 +59,8 @@
   gen r vrand-in-unit-sphere to gen
   r n vdot 0e f< if
     -1e r out vmul
+  else
+    r out vec3-move
   then
   gen
   r vp pool-free

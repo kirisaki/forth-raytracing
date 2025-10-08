@@ -13,14 +13,26 @@ include ./camera.fs
 variable rng
 
 \ Convert ray into color vector
-: ray-color ( ray-addr head out-addr vp hrp sp -- )
-  locals| sp hrp vp col head ray |
+: ray-color ( ray-addr depth head out-addr vp hrp sp rp -- )
+  locals| rp sp hrp vp col head dep ray |
   hrp hit-record-empty locals| rec |
-  0e inf
+  dep 0<= if
+    0e 0e 0e col v!
+    rec hrp pool-free
+    exit
+  then
+  0.001e inf
   ray head rec hrp vp hit if
-    1e 1e 1e col v!
-    col rec h-normal v+=
-    col 2e vdiv=
+    vp vec3-zero vp vec3-zero locals| target rnd |
+    rec h-normal target vec3-move
+    rng @ rec h-normal rnd vp vrand-in-hemisphere rng !
+    target rnd v+=
+    rec h-point target rp ray-new locals| new-ray |
+    new-ray dep 1- head col vp hrp sp rp recurse
+    0.5e col vmul=
+    new-ray rp pool-free
+    target vp pool-free
+    rnd vp pool-free
   else
     vp vec3-zero locals| unit-dir |
     ray r-direction unit-dir vunit
@@ -45,9 +57,9 @@ variable rng
 : pixel-color ( color samples -- u u u )
   locals| samples color |
   1.0e samples s>f f/
-  fdup color vx f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| r |
-  fdup color vy f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| g |
-  color vz f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| b |
+  fdup color vx f@ f* fsqrt 0e 0.999e fclamp 256e f* floor f>s locals| r |
+  fdup color vy f@ f* fsqrt 0e 0.999e fclamp 256e f* floor f>s locals| g |
+  color vz f@ f* fsqrt 0e 0.999e fclamp 256e f* floor f>s locals| b |
   r g b
 ;
 
@@ -68,6 +80,7 @@ variable rng
 
   vp cp default-camera locals| cam |
   50 locals| samples |
+  50 locals| max-depth |
   3.555555e 0e 0e vp vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
   0e 2e 0e vp vec3-new locals| vertical |
   0e 0e 0e vp vec3-new locals| orig |
@@ -81,20 +94,20 @@ variable rng
   llc v/2 v-=
   llc focal v-=
 
-  arena arena-mark locals| mark |
   orig orig rp ray-new locals| ray |  
   vp vec3-zero vp vec3-zero vp vec3-zero
   locals| dir uh vv |
-      vp vec3-zero  locals| pix |
-        vp vec3-zero locals| col |
   0 h 1- do
     w 0 do
+      arena arena-mark locals| mark |
+      vp vec3-zero locals| pix |
+      vp vec3-zero locals| col |
       0e 0e 0e pix v!
       samples 0 do
         j s>f rng @ frand rng ! f+ w 1- s>f f/ 
         k s>f rng @ frand rng ! f+ h 1- s>f f/ 
         cam ray vp get-ray
-        ray head col vp hrp sp ray-color
+        ray max-depth head col vp hrp sp rp ray-color
         pix col v+=
       loop
 
@@ -107,6 +120,9 @@ variable rng
       drop
       
       mark arena arena-rollback
+      vp pool-reset
+      rp pool-reset
+      hrp pool-reset
     loop
   -1 +loop
   arena arena-destroy
@@ -115,10 +131,11 @@ variable rng
 
 
 : main
-  \ 384 216 generate-pnm s" out.ppm" write-pnm
+  384 216 generate-pnm s" out.ppm" write-pnm
+  \ 640 320 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
-  test-random
+  \ test-random
   \ test-clamp
   \ test-arena
   \ test-pool
