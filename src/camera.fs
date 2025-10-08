@@ -21,25 +21,28 @@ end-structure
 ;
 
 \ Make a default camera
-: default-camera ( out vp -- )
-  locals| vp out |
+: default-camera ( vp cp -- cam )
+  locals| cp vp |
+  vp vec3-zero locals| tmp |
   vp vec3-zero locals| h-tmp |
   vp vec3-zero locals| v-tmp |
+  0e 0e 1e vp vec3-new locals| llc |
   0e 0e 0e vp vec3-new locals| orig |
   3.5555556e 0e 0e vp vec3-new locals| horizontal |
   0e 2e 0e vp vec3-new locals| vertical |
-  orig out vec3-move
+  orig tmp vec3-move
   horizontal 2e h-tmp vdiv
   vertical 2e v-tmp vdiv
-  out h-tmp v-= out v-tmp v-=
-  0e 0e 1e vp vec3-new locals| llc |
+  tmp h-tmp v-= tmp v-tmp v-=
+  tmp llc v-=
 
-  out c-origin vec3-move
-  out c-horizontal horizontal vec3-move
-  out c-vertical vertical vec3-move
-  out c-llc llc vec3-move
-  out
+  cp pool-alloc
+  dup c-origin orig swap vec3-move
+  dup c-horizontal horizontal swap vec3-move
+  dup c-vertical vertical swap vec3-move
+  dup c-llc tmp swap vec3-move
 
+  tmp vp pool-free
   h-tmp vp pool-free
   v-tmp vp pool-free
   orig vp pool-free
@@ -65,13 +68,21 @@ end-structure
 \ Get ray from camera at (u,v)
 : get-ray ( c out-ray vp -- ) ( u v -- )
   locals| vp out cam |
-  vp vec3-zero vp vec3-zero locals| tmp-h tmp-v |
-  cam c-llc out vec3-move
+  vp vec3-zero vp vec3-zero vp vec3-zero locals| dir tmp-h tmp-v |
+
+  cam c-llc dir vec3-move
   cam c-vertical tmp-v vmul
   cam c-horizontal tmp-h vmul
-  out tmp-v v+=
-  out tmp-h v+=
-  out cam c-origin v-=
+  dir tmp-v v+=
+  dir tmp-h v+=
+  dir cam c-origin v-=
+
+  cam c-origin out r-origin vec3-move
+  dir out r-direction vec3-move
+
+  dir vp pool-free
+  tmp-h vp pool-free
+  tmp-v vp pool-free
 ;
 
 \ Tests

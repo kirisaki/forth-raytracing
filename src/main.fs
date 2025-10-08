@@ -42,26 +42,32 @@ variable rng
 ;
 
 \ Color to a pixel
-: pixel-color ( color -- u u u )
-  locals| color |
-  color vx f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
-  color vy f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
-  color vz f@ 255.999e f* f>s dup 0< if drop 0 then dup 255 > if drop 255 then
+: pixel-color ( color samples -- u u u )
+  locals| samples color |
+  1.0e samples s>f f/
+  fdup color vx f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| r |
+  fdup color vy f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| g |
+  color vz f@ f* 0e 0.999e fclamp 256e f* floor f>s locals| b |
+  r g b
 ;
+
 : generate-pnm ( width height -- width height c-addr )
+  utime drop rng !
   locals| h w |
   w h * 3 * allocate throw locals| data |
 
-  20 1024 * arena-create locals| arena |
+  500 1024 * arena-create locals| arena |
   arena vec3-pool-create locals| vp |
   arena ray-pool-create locals| rp |
   arena sphere-pool-create locals| sp |
   arena hit-record-pool-create locals| hrp |
-
+  arena camera-pool-create locals| cp |
   0 locals| head |
   0e 0e -1e vp vec3-new 0.5e sp sphere-new head sp push-front to head
   0e -100.5e -1e vp vec3-new 100e sp sphere-new head sp push-front to head
 
+  vp cp default-camera locals| cam |
+  50 locals| samples |
   3.555555e 0e 0e vp vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
   0e 2e 0e vp vec3-new locals| vertical |
   0e 0e 0e vp vec3-new locals| orig |
@@ -77,22 +83,22 @@ variable rng
 
   arena arena-mark locals| mark |
   orig orig rp ray-new locals| ray |  
-  vp vec3-zero vp vec3-zero vp vec3-zero vp vec3-zero 
-  locals| dir uh vv col |
+  vp vec3-zero vp vec3-zero vp vec3-zero
+  locals| dir uh vv |
+      vp vec3-zero  locals| pix |
+        vp vec3-zero locals| col |
   0 h 1- do
     w 0 do
-      i s>f w 1- s>f f/ 
-      j s>f h 1- s>f f/ 
+      0e 0e 0e pix v!
+      samples 0 do
+        j s>f rng @ frand rng ! f+ w 1- s>f f/ 
+        k s>f rng @ frand rng ! f+ h 1- s>f f/ 
+        cam ray vp get-ray
+        ray head col vp hrp sp ray-color
+        pix col v+=
+      loop
 
-      vertical vv vmul
-      horizontal uh vmul
-      llc dir vec3-move
-      dir uh v+=
-      dir vv v+=
-      dir orig v-=
-      dir ray r-direction vec3-move
-      ray head col vp hrp sp ray-color
-      col pixel-color locals| b g r |
+      pix samples pixel-color locals| b g r |
 
       h 1- j - w * i + 3 * data + 
       r over c!
@@ -109,7 +115,7 @@ variable rng
 
 
 : main
-  \ 384 216 generate-pnm s" out.ppm" write-pnm
+  384 216 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
   \ test-random
@@ -119,7 +125,7 @@ variable rng
   \ test-ray
   \ test-sphere
   \ test-hit
-  test-camera
+  \ test-camera
 ;
 
 
