@@ -9,6 +9,7 @@ include ./list.fs
 include ./hit.fs
 include ./random.fs
 include ./camera.fs
+include ./material.fs
 
 variable rng
 
@@ -23,17 +24,18 @@ variable rng
   then
   0.001e inf
   ray head rec hrp vp hit if
-    vp vec3-zero vp vec3-zero locals| target rnd |
-    rec h-normal target vec3-move
-    rng @ rec h-normal rnd vp vrand-in-hemisphere rng !
-    target rnd v+=
-    rec h-point target rp ray-new locals| new-ray |
-    new-ray dep 1- head col vp hrp sp rp recurse
-    0.5e col vmul=
-    new-ray rp pool-free
-    target vp pool-free
-    rnd vp pool-free
+    rp pool-alloc locals| ray-out |
+    vp pool-alloc locals| att-out |
+    rec h-material @ ray rec ray-out att-out vp rng @ scatter rng ! if
+      ray-out dep 1- head col vp hrp sp rp recurse
+      col att-out vhprod=
+    else
+      0e 0e 0e col v!
+    then
+    att-out vp pool-free
+    ray-out rp pool-free
   else
+    \ Background
     vp vec3-zero locals| unit-dir |
     ray r-direction unit-dir vunit
     unit-dir vy f@ 1.0e f+ 2.0e f/
@@ -74,13 +76,22 @@ variable rng
   arena sphere-pool-create locals| sp |
   arena hit-record-pool-create locals| hrp |
   arena camera-pool-create locals| cp |
+  arena material-pool-create locals| mp |
+
   0 locals| head |
-  0e 0e -1e vp vec3-new 0.5e sp sphere-new head sp push-front to head
-  0e -100.5e -1e vp vec3-new 100e sp sphere-new head sp push-front to head
+  lambertian 0.8e 0.3e 0.3e vp vec3-new 0e mp material-new locals| mat1 |
+  lambertian 0.8e 0.8e 0.0e vp vec3-new 0e mp material-new locals| mat2 |
+  metal 0.8e 0.6e 0.2e vp vec3-new 0.3e mp material-new locals| mat3 |
+  metal 0.8e 0.8e 0.8e vp vec3-new 0e mp material-new locals| mat4 |
+
+  0e -100.5e -1e vp vec3-new 100e mat2 sp sphere-new head sp push-front to head
+  0e 0e -1e vp vec3-new 0.5e mat1 sp sphere-new head sp push-front to head
+  1e 0e -1e vp vec3-new 0.5e mat3 sp sphere-new head sp push-front to head
+  -1e 0e -1e vp vec3-new 0.5e mat4 sp sphere-new head sp push-front to head
 
   vp cp default-camera locals| cam |
   50 locals| samples |
-  50 locals| max-depth |
+  20 locals| max-depth |
   3.555555e 0e 0e vp vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
   0e 2e 0e vp vec3-new locals| vertical |
   0e 0e 0e vp vec3-new locals| orig |
@@ -98,6 +109,7 @@ variable rng
   vp vec3-zero vp vec3-zero vp vec3-zero
   locals| dir uh vv |
   0 h 1- do
+    i .
     w 0 do
       arena arena-mark locals| mark |
       vp vec3-zero locals| pix |
@@ -131,7 +143,8 @@ variable rng
 
 
 : main
-  384 216 generate-pnm s" out.ppm" write-pnm
+  192 108 generate-pnm s" out.ppm" write-pnm
+  \ 384 216 generate-pnm s" out.ppm" write-pnm
   \ 640 320 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
@@ -143,6 +156,7 @@ variable rng
   \ test-sphere
   \ test-hit
   \ test-camera
+  \ test-material
 ;
 
 

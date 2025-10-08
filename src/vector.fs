@@ -35,9 +35,9 @@ end-structure
 
 \ Load vector
 : v@ ( v-addr -- ) ( -- f f f )
-  dup vz f@ f.
-  dup vy f@ f.
-  vx f@ f.
+  dup vz f@
+  dup vy f@
+  vx f@
 ;
 
 \ print vector
@@ -211,6 +211,23 @@ end-structure
     fdrop 1e
   then
   vdiv=
+;
+
+\ Reflected vector
+: vreflect ( v-addr n-addr out-addr -- )
+  locals| v-out n v |
+  v n vdot -2e f*
+  n v-out vmul
+  v-out v v+=
+;
+
+\ Multipuly vector by vector in place (Hadamard product)
+: vhprod= ( v1-addr v2-addr -- )
+  locals| v2 v1 |
+  v1 vx f@ v2 vx f@ f*
+  v1 vy f@ v2 vy f@ f*
+  v1 vz f@ v2 vz f@ f*
+  v1 v!
 ;
 
 \ Tests

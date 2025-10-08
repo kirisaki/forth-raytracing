@@ -2,6 +2,7 @@
 begin-structure sphere%
   vec3% +field s-center
   ffield: s-radius
+  field: s-material
 end-structure
 
 \ Initialize sphere pool
@@ -10,11 +11,12 @@ end-structure
 ;
 
 \ Create a new sphere
-: sphere-new ( center  pool -- sphere-addr ) ( radius -- )
-  locals| sp c |
+: sphere-new ( center material pool -- sphere-addr ) ( radius -- )
+  locals| sp m c |
   sp pool-alloc
   dup s-center c swap vec3-move
   dup s-radius f!
+  dup s-material m swap !
 ;
 
 \ Display sphere
@@ -32,6 +34,7 @@ begin-structure hit-record%
   vec3%   +field h-normal
   ffield: h-t-val
   field: h-front-face
+  field: h-material
 end-structure
 
 \ Initialize hit record pool
@@ -46,6 +49,7 @@ end-structure
   dup h-normal 0e 0e 0e v!
   dup h-t-val 0e f!
   dup h-front-face 0 swap !
+  dup h-material 0 swap !
 ;
 
 \ Display hit record
@@ -66,6 +70,7 @@ end-structure
   over h-point over h-point vec3-move
   over h-normal over h-normal vec3-move
   over h-t-val f@ dup h-t-val f!
+  over h-material @ over h-material !
   swap h-front-face @ swap h-front-face !
 ;
 
@@ -110,6 +115,7 @@ end-structure
       at rec h-point vec3-move
       at s s-center v-= at s s-radius f@ vdiv=
       ray at rec hit-record-set-face-normal
+      s s-material @ rec h-material !
       fdrop fdrop fdrop fdrop fdrop fdrop
       true
       at vp pool-free
@@ -127,6 +133,7 @@ end-structure
       at rec h-point vec3-move
       at s s-center v-= at s s-radius f@ vdiv=
       ray at rec hit-record-set-face-normal
+      s s-material @ rec h-material !
       fdrop fdrop fdrop fdrop fdrop fdrop
       true
       at vp pool-free

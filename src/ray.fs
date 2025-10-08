@@ -32,11 +32,11 @@ end-structure
 ;
 
 \ Get point along ray at parameter t
-: ray-at ( ray-addr out-addr pool -- ) ( t -- )
-  locals| p out r |
+: ray-at ( ray-addr v-out-addr pool -- ) ( t -- )
+  locals| p v-out  r |
   p vec3-zero 
   r r-direction over vmul
-  dup r r-origin out v+
+  dup r r-origin v-out v+
   p pool-free
 ;
 

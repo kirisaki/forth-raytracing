@@ -53,14 +53,14 @@
 ;
 
 \ Generate a random vector in hemisphere
-: vrand-in-hemisphere ( rng normal-addr out vp -- rng )
-  locals| vp out n gen |
+: vrand-in-hemisphere ( rng normal-addr v-out vp -- rng )
+  locals| vp v-out n gen |
   vp pool-alloc locals| r |
   gen r vrand-in-unit-sphere to gen
   r n vdot 0e f< if
-    -1e r out vmul
+    -1e r v-out vmul
   else
-    r out vec3-move
+    r v-out vec3-move
   then
   gen
   r vp pool-free

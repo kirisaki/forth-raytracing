@@ -67,7 +67,7 @@ end-structure
 
 \ Get ray from camera at (u,v)
 : get-ray ( c out-ray vp -- ) ( u v -- )
-  locals| vp out cam |
+  locals| vp ray-out cam |
   vp vec3-zero vp vec3-zero vp vec3-zero locals| dir tmp-h tmp-v |
 
   cam c-llc dir vec3-move
@@ -77,8 +77,8 @@ end-structure
   dir tmp-h v+=
   dir cam c-origin v-=
 
-  cam c-origin out r-origin vec3-move
-  dir out r-direction vec3-move
+  cam c-origin ray-out r-origin vec3-move
+  dir ray-out r-direction vec3-move
 
   dir vp pool-free
   tmp-h vp pool-free
