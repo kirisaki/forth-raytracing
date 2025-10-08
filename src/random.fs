@@ -52,15 +52,17 @@
   again
 ;
 
-\ \ Generate a random vector in hemisphere
-\ : vrand-in-hemisphere ( normal-addr u v-addr -- u )
-\   >r
-\   temp-vec| r |
-\   r vrand-in-unit-sphere
-\   r normal vdot 0e f< if
-\     -1e r >r vmul
-\   then
-\ ;
+\ Generate a random vector in hemisphere
+: vrand-in-hemisphere ( rng normal-addr out vp -- rng )
+  locals| vp out n gen |
+  vp pool-alloc locals| r |
+  gen r vrand-in-unit-sphere to gen
+  r n vdot 0e f< if
+    -1e r out vmul
+  then
+  gen
+  r vp pool-free
+;
 
 \ \ Fenerate a random vector in unit disk
 \ : vrand-in-unit-disk ( u v-addr -- u )
@@ -102,7 +104,9 @@
   cr cr
 
   
-  vec3% allocate throw locals| v |
+  1024 arena-create locals| arena |
+  arena vec3-pool-create locals| vp |
+  vp pool-alloc locals| v |
   ." 5 random vectors in [0.0, 1.0): " cr
   1234567890
   5 0 do
@@ -119,7 +123,6 @@
   drop
   cr cr
 
-  v .v cr
   ." 5 random vectors in unit sphere: " cr
   1234567890
   5 0 do
@@ -128,6 +131,14 @@
   drop
   cr cr
 
-  v free throw
+  ." 5 random vectors in hemisphere (normal = 0,1,0): " cr
+  1234567890
+  0e 1e 0e vp vec3-new locals| n |
+  5 0 do
+    n v vp vrand-in-hemisphere v .v
+  loop
+  drop
+
+  arena arena-destroy
   cr
 ;

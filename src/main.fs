@@ -115,10 +115,10 @@ variable rng
 
 
 : main
-  384 216 generate-pnm s" out.ppm" write-pnm
+  \ 384 216 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
-  \ test-random
+  test-random
   \ test-clamp
   \ test-arena
   \ test-pool
