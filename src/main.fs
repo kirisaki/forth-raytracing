@@ -79,10 +79,10 @@ variable rng
   arena material-pool-create locals| mp |
 
   0 locals| head |
-  lambertian 0.8e 0.3e 0.3e vp vec3-new 0e mp material-new locals| mat1 |
-  lambertian 0.8e 0.8e 0.0e vp vec3-new 0e mp material-new locals| mat2 |
-  metal 0.8e 0.6e 0.2e vp vec3-new 0.3e mp material-new locals| mat3 |
-  metal 0.8e 0.8e 0.8e vp vec3-new 0e mp material-new locals| mat4 |
+  lambertian 0.8e 0.3e 0.3e vp vec3-new 0e 0e mp material-new locals| mat1 |
+  lambertian 0.8e 0.8e 0.0e vp vec3-new 0e 0e mp material-new locals| mat2 |
+  metal 0.8e 0.6e 0.2e vp vec3-new 0.3e 0e mp material-new locals| mat3 |
+  dielectric 0e 0e 0e vp vec3-new 0e 1.5e mp material-new locals| mat4 |
 
   0e -100.5e -1e vp vec3-new 100e mat2 sp sphere-new head sp push-front to head
   0e 0e -1e vp vec3-new 0.5e mat1 sp sphere-new head sp push-front to head

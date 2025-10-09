@@ -2,6 +2,7 @@ begin-structure material%
   field: m-type
   vec3% +field m-albedo
   ffield: m-fuzz
+  ffield: m-ref
 end-structure
 
 \ Material types
@@ -15,10 +16,11 @@ end-structure
 ;
 
 \ New material
-: material-new ( type albedo mp -- addr ) ( f-fuzz -- )
+: material-new ( type albedo mp -- addr ) ( f-fuzz f-ref -- )
   pool-alloc >r
   r@ m-albedo vec3-move
   r@ m-type !
+  r@ m-ref f!
   r@ m-fuzz f!
   r>
 ;
@@ -35,8 +37,18 @@ end-structure
   dup m-albedo .v cr
   s" fuzz: " type cr cr
   m-fuzz f@ f. cr
+  s" ref-index: " type cr
+  m-ref f@ f. cr
   cr
 ;
+
+\ Schlieren approximation for reflectance
+: schlick ( -- ) ( cos ref-index -- reflectance )
+  fdup 1e fswap f- fswap 1e f+ f/ \ cos r0
+  fdup f* \ cos r0^2
+  fdup 1e fswap f- 1e 3 fpick f- 5e f** f* f+ fnip
+;
+
 
 : scatter ( mat ray rec ray-out att-aout vp rng -- flag rng ) 
   locals| gen vp att-out ray-out rec ray mat |
@@ -69,6 +81,47 @@ end-structure
       reflected vp pool-free
       rndv vp pool-free
     endof
+    dielectric of
+      rec h-front-face @ if
+        1e mat m-ref f@ f/ 
+      else
+        mat m-ref f@ 
+      then
+      fdup
+      vp vec3-zero vp vec3-zero vp vec3-zero locals| r s ref |
+      ray r-direction r vunit -1e r s vmul s rec h-normal vdot 1e fmin \ etai etai cos
+      fdup fdup f* 1e fswap f- fabs fsqrt \ etai etai cos sin
+      2 fpick f* 1e f> if \ etai etai cos
+        \ total internal reflection
+        r rec h-normal ref vreflect
+        rec h-point ray-out r-origin vec3-move
+        r ray-out r-direction vec3-move
+        1e 1e 1e att-out v!
+        true
+        fdrop fdrop fdrop
+      else
+        fswap schlick gen frand to gen f> if
+          \ reflect
+          r rec h-normal ref vreflect
+          rec h-point ray-out r-origin vec3-move
+          ref ray-out r-direction vec3-move
+          1e 1e 1e att-out v!
+          true
+          fdrop 
+        else
+          \ refraction
+          r rec h-normal ref vp vrefract
+          rec h-point ray-out r-origin vec3-move
+          ref ray-out r-direction vec3-move
+          1e 1e 1e att-out v!
+          true
+        then
+      then
+      gen
+      r vp pool-free
+      s vp pool-free
+      ref vp pool-free
+    endof
   endcase
 ;
 
@@ -80,7 +133,7 @@ end-structure
   arena vec3-pool-create locals| vp |
 
   s" Display material:" type cr
-  metal 0.5e 0.3e 0.2e vp vec3-new 0.0e mp material-new locals| m |
+  metal 0.5e 0.3e 0.2e vp vec3-new 0.0e 0.0e mp material-new locals| m |
   m .material
 
   check-stacks

@@ -221,6 +221,18 @@ end-structure
   v-out v v+=
 ;
 
+\ Refract vector uv with normal n and refraction ratio etai_over_etat
+: vrefract ( uv n v-out vp -- ) ( etai_over_etat -- )
+  locals| vp v-out n uv |
+  uv n vdot fnegate 1e fmin
+  n v-out vmul v-out uv v+= v-out vmul=
+  vp pool-alloc locals| nmul |
+  v-out vlength2 1e fswap f- fabs fsqrt fnegate
+  n nmul vmul v-out nmul v+=
+  nmul vp pool-free
+;
+
+
 \ Multipuly vector by vector in place (Hadamard product)
 : vhprod= ( v1-addr v2-addr -- )
   locals| v2 v1 |
