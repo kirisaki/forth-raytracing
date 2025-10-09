@@ -13,7 +13,7 @@ Implimentation of [Ray Tracing in One Weekend Series](https://raytracing.github.
 
 ## Getting started
 
-1. Configure the image size in [main.fs](src/main.fs) (Recomend 192x108 first)
+1. Configure the image size in [main.fs](src/main.fs) (Recommend 192x108 first)
 2. `make run`
 
 ## License
