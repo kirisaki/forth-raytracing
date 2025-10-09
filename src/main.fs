@@ -70,7 +70,7 @@ variable rng
   locals| h w |
   w h * 3 * allocate throw locals| data |
 
-  500 1024 * arena-create locals| arena |
+  200 1024 * arena-create locals| arena |
   arena vec3-pool-create locals| vp |
   arena ray-pool-create locals| rp |
   arena sphere-pool-create locals| sp |
@@ -126,8 +126,8 @@ variable rng
   0.1e \ aperture
   10e  \ focus-dist
   lookfrom lookat vup vp cp make-camera locals| cam |
-  50 locals| samples |
-  20 locals| max-depth |
+  100 locals| samples |
+  50 locals| max-depth |
   vp vec3-zero locals| vzero |
 
   vzero vzero rp ray-new locals| ray |  
@@ -168,9 +168,10 @@ variable rng
 
 
 : main
-  192 108 generate-pnm s" out.ppm" write-pnm
+  \ 192 108 generate-pnm s" out.ppm" write-pnm
   \ 384 216 generate-pnm s" out.ppm" write-pnm
   \ 640 320 generate-pnm s" out.ppm" write-pnm
+  1024 576 generate-pnm s" out.ppm" write-pnm
   \ test-vector
   \ test-list
   \ test-random
