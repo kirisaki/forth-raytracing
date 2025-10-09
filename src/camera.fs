@@ -51,6 +51,38 @@ end-structure
   llc vp pool-free
 ;
 
+\ Make a camera
+: make-camera ( lookfrom lookat vup vp cp  -- cam-addr ) ( fov aspect -- )
+  locals| cp vp vup lookat lookfrom |
+  fswap 2e f/ ftan \ h
+  2e f* \ aspect height
+  ftuck f* \ height width
+
+  vp vec3-zero vp vec3-zero vp vec3-zero locals| u v w |
+  vp vec3-zero vp vec3-zero locals| h/2 v/2 |
+  vp vec3-zero locals| llc |
+
+  lookfrom lookat w v- w vunit=
+  vup w u vcross u vunit=
+  w u v vcross
+  u vmul=
+  v vmul=
+  u h/2 2e vdiv
+  v v/2 2e vdiv
+  lookfrom llc vec3-move
+  llc h/2 v-=
+  llc v/2 v-= 
+  llc w v-=
+  
+  lookfrom llc u v cp camera-new
+  u vp pool-free
+  v vp pool-free
+  w vp pool-free
+  h/2 vp pool-free
+  v/2 vp pool-free
+  llc vp pool-free
+;
+
 \ Display a camera
 : .camera ( c -- )
   ." Camera:" cr

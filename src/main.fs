@@ -89,7 +89,10 @@ variable rng
   1e 0e -1e vp vec3-new 0.5e mat3 sp sphere-new head sp push-front to head
   -1e 0e -1e vp vec3-new 0.5e mat4 sp sphere-new head sp push-front to head
 
-  vp cp default-camera locals| cam |
+  -2e 2e 1e vp vec3-new locals| lookfrom |
+  0e 0e -1e vp vec3-new locals| lookat |
+  0e 1e 0e vp vec3-new locals| vup |
+  lookfrom lookat vup vp cp pi 12e f/ 16e 9e f/ make-camera locals| cam |
   50 locals| samples |
   20 locals| max-depth |
   3.555555e 0e 0e vp vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
