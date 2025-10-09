@@ -89,26 +89,20 @@ variable rng
   1e 0e -1e vp vec3-new 0.5e mat3 sp sphere-new head sp push-front to head
   -1e 0e -1e vp vec3-new 0.5e mat4 sp sphere-new head sp push-front to head
 
-  -2e 2e 1e vp vec3-new locals| lookfrom |
+  3e 3e 2e vp vec3-new locals| lookfrom |
   0e 0e -1e vp vec3-new locals| lookat |
   0e 1e 0e vp vec3-new locals| vup |
-  lookfrom lookat vup vp cp pi 12e f/ 16e 9e f/ make-camera locals| cam |
+  pi 9e f/ \ vfov
+  16e 9e f/ \ aspect ratio
+  2e \ aperture
+  vp vec3-zero locals| tmp |
+  lookfrom lookat tmp v- tmp vlength  \ focus-dist
+  lookfrom lookat vup vp cp make-camera locals| cam |
   50 locals| samples |
   20 locals| max-depth |
-  3.555555e 0e 0e vp vec3-new locals| horizontal | \ 3.555... = viewport height(2.0) * aspect ratio(16/9)
-  0e 2e 0e vp vec3-new locals| vertical |
-  0e 0e 0e vp vec3-new locals| orig |
-  0e 0e 1e vp vec3-new locals| focal |
-  vp vec3-zero vp vec3-zero locals| h/2 v/2 |
-  horizontal h/2 2e vdiv
-  vertical v/2 2e vdiv
-  vp vec3-zero locals| llc |
-  orig llc vec3-move
-  llc h/2 v-=
-  llc v/2 v-=
-  llc focal v-=
+  vp vec3-zero locals| vzero |
 
-  orig orig rp ray-new locals| ray |  
+  vzero vzero rp ray-new locals| ray |  
   vp vec3-zero vp vec3-zero vp vec3-zero
   locals| dir uh vv |
   0 h 1- do
@@ -121,7 +115,7 @@ variable rng
       samples 0 do
         j s>f rng @ frand rng ! f+ w 1- s>f f/ 
         k s>f rng @ frand rng ! f+ h 1- s>f f/ 
-        cam ray vp get-ray
+        cam ray rng @ vp get-ray rng !
         ray max-depth head col vp hrp sp rp ray-color
         pix col v+=
       loop

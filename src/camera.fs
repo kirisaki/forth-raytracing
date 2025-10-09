@@ -3,6 +3,10 @@ begin-structure camera%
   vec3% +field c-llc
   vec3% +field c-horizontal
   vec3% +field c-vertical
+  vec3% +field c-u
+  vec3% +field c-v
+  vec3% +field c-w
+  ffield: c-lens-radius
 end-structure
 
 \ Initialize camera pool
@@ -11,76 +15,54 @@ end-structure
 ;
 
 \ Create new camera
-: camera-new ( o llc h v cp -- addr )
-  locals| cp v h llc o |
+: camera-new ( o llc hor ver u v w cp -- addr ) ( f-lens-radius -- )
+  locals| cp w v u ver hor llc o |
   cp pool-alloc
   dup c-origin    o swap vec3-move
   dup c-llc       llc swap vec3-move
-  dup c-horizontal h swap vec3-move
-  dup c-vertical   v swap vec3-move 
-;
-
-\ Make a default camera
-: default-camera ( vp cp -- cam )
-  locals| cp vp |
-  vp vec3-zero locals| tmp |
-  vp vec3-zero locals| h-tmp |
-  vp vec3-zero locals| v-tmp |
-  0e 0e 1e vp vec3-new locals| llc |
-  0e 0e 0e vp vec3-new locals| orig |
-  3.5555556e 0e 0e vp vec3-new locals| horizontal |
-  0e 2e 0e vp vec3-new locals| vertical |
-  orig tmp vec3-move
-  horizontal 2e h-tmp vdiv
-  vertical 2e v-tmp vdiv
-  tmp h-tmp v-= tmp v-tmp v-=
-  tmp llc v-=
-
-  cp pool-alloc
-  dup c-origin orig swap vec3-move
-  dup c-horizontal horizontal swap vec3-move
-  dup c-vertical vertical swap vec3-move
-  dup c-llc tmp swap vec3-move
-
-  tmp vp pool-free
-  h-tmp vp pool-free
-  v-tmp vp pool-free
-  orig vp pool-free
-  horizontal vp pool-free
-  vertical vp pool-free
-  llc vp pool-free
+  dup c-horizontal hor swap vec3-move
+  dup c-vertical   ver swap vec3-move 
+  dup c-u         u swap vec3-move
+  dup c-v         v swap vec3-move
+  dup c-w         w swap vec3-move
+  dup c-lens-radius f!
 ;
 
 \ Make a camera
-: make-camera ( lookfrom lookat vup vp cp  -- cam-addr ) ( fov aspect -- )
+: make-camera ( lookfrom lookat vup vp cp  -- cam-addr ) ( fov aspect aperture focus-dist -- )
   locals| cp vp vup lookat lookfrom |
-  fswap 2e f/ ftan \ h
-  2e f* \ aspect height
-  ftuck f* \ height width
+  3 fpick 2e f/ ftan 
+  2e f*
+  fdup 4 fpick f* \ fov aspect aperture focus-dist height width
 
   vp vec3-zero vp vec3-zero vp vec3-zero locals| u v w |
+  vp vec3-zero vp vec3-zero locals| hori vert |
   vp vec3-zero vp vec3-zero locals| h/2 v/2 |
   vp vec3-zero locals| llc |
 
   lookfrom lookat w v- w vunit=
   vup w u vcross u vunit=
   w u v vcross
-  u vmul=
-  v vmul=
-  u h/2 2e vdiv
-  v v/2 2e vdiv
+  u 2 fpick f* hori vmul
+  v fover f* vert vmul
+  vp vec3-zero locals| w' |
+  w w' vmul
+  hori h/2 2e vdiv
+  vert v/2 2e vdiv
   lookfrom llc vec3-move
   llc h/2 v-=
   llc v/2 v-= 
-  llc w v-=
+  llc w' v-=
   
-  lookfrom llc u v cp camera-new
+  lookfrom llc hori vert u v w 2e f/ cp camera-new
   u vp pool-free
   v vp pool-free
   w vp pool-free
+  w' vp pool-free
   h/2 vp pool-free
   v/2 vp pool-free
   llc vp pool-free
+  fdrop fdrop
 ;
 
 \ Display a camera
@@ -98,9 +80,17 @@ end-structure
 ;
 
 \ Get ray from camera at (u,v)
-: get-ray ( c out-ray vp -- ) ( u v -- )
-  locals| vp ray-out cam |
+: get-ray ( cam out-ray gen vp -- gen ) ( s t -- )
+  locals| vp gen ray-out cam |
   vp vec3-zero vp vec3-zero vp vec3-zero locals| dir tmp-h tmp-v |
+  vp vec3-zero vp vec3-zero locals| rd rnd |
+  gen rnd vp vrand-in-unit-disk to gen
+  cam c-lens-radius f@ rnd rd vmul
+  vp vec3-zero locals| offset |
+  vp vec3-zero vp vec3-zero locals| u' v' |
+  cam c-u rd vx f@ u' vmul
+  cam c-v rd vy f@ v' vmul
+  u' v' offset v+
 
   cam c-llc dir vec3-move
   cam c-vertical tmp-v vmul
@@ -108,13 +98,21 @@ end-structure
   dir tmp-v v+=
   dir tmp-h v+=
   dir cam c-origin v-=
+  dir offset v-=
 
-  cam c-origin ray-out r-origin vec3-move
+  offset cam c-origin v+=
+  offset ray-out r-origin vec3-move
   dir ray-out r-direction vec3-move
 
   dir vp pool-free
   tmp-h vp pool-free
   tmp-v vp pool-free
+  rd vp pool-free
+  rnd vp pool-free
+  offset vp pool-free
+  u' vp pool-free
+  v' vp pool-free
+  gen
 ;
 
 \ Tests

@@ -66,18 +66,23 @@
   r vp pool-free
 ;
 
-\ \ Fenerate a random vector in unit disk
-\ : vrand-in-unit-disk ( u v-addr -- u )
-\   begin
-\     -1e 1e frand-range
-\     -1e 1e frand-range
-\     0e vec3-new
-\     dup vlength2 1e f< if
-\       exit
-\     then
-\     drop
-\   again
-\ ;
+\ Generate a random vector in unit disk
+: vrand-in-unit-disk ( u v-addr vp -- u )
+  locals| vp v-out gen |
+  0 locals| p |
+  begin
+    -1e 1e gen frand-range to gen
+    -1e 1e gen frand-range to gen
+    0e vp vec3-new to p
+    p vlength2 1e f< if
+      p v-out vec3-move
+      p vp pool-free
+      gen
+      exit
+    then
+  again
+  p vp pool-free
+;
 
 : test-random ( -- )
   cr ." ---test-random" cr
