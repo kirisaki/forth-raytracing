@@ -79,24 +79,52 @@ variable rng
   arena material-pool-create locals| mp |
 
   0 locals| head |
-  lambertian 0.8e 0.3e 0.3e vp vec3-new 0e 0e mp material-new locals| mat1 |
-  lambertian 0.8e 0.8e 0.0e vp vec3-new 0e 0e mp material-new locals| mat2 |
-  metal 0.8e 0.6e 0.2e vp vec3-new 0.3e 0e mp material-new locals| mat3 |
-  dielectric 0e 0e 0e vp vec3-new 0e 1.5e mp material-new locals| mat4 |
 
-  0e -100.5e -1e vp vec3-new 100e mat2 sp sphere-new head sp push-front to head
-  0e 0e -1e vp vec3-new 0.5e mat1 sp sphere-new head sp push-front to head
-  1e 0e -1e vp vec3-new 0.5e mat3 sp sphere-new head sp push-front to head
-  -1e 0e -1e vp vec3-new 0.5e mat4 sp sphere-new head sp push-front to head
+  \ ground
+  0e -1000e 0e vp vec3-new 1000e lambertian 0.5e 0.5e 0.5e vp vec3-new 0e 0e mp material-new sp sphere-new head sp push-front to head
 
-  3e 3e 2e vp vec3-new locals| lookfrom |
-  0e 0e -1e vp vec3-new locals| lookat |
+  \ three spheres
+  0e 1e 0e vp vec3-new 1e dielectric 0e 0e 0e vp vec3-new 0e 1.5e mp material-new sp sphere-new head sp push-front to head
+  -4e 1e 0e vp vec3-new 1e lambertian 0.4e 0.2e 0.1e vp vec3-new 0e 0e mp material-new sp sphere-new head sp push-front to head
+  4e 1e 0e vp vec3-new 1e metal 0.7e 0.6e 0.5e vp vec3-new 0.1e 0e mp material-new sp sphere-new head sp push-front to head
+
+  \ random small spheres
+  11 -11 do
+    11 -11 do
+      j s>f 0.9e rng @ frand rng ! f* f+
+      0.2e
+      i s>f 0.9e rng @ frand rng ! f* f+
+      vp vec3-new locals| center |
+      vp vec3-zero locals| albedo |
+      vp vec3-zero vp vec3-zero locals| r1 r2 |
+      rng @ r1 vrand r2 vrand rng !
+      r1 r2 albedo vhprod
+      r1 vp pool-free r2 vp pool-free
+
+      vp vec3-zero locals| tmp |
+      center 4e 0.2e 0e vp vec3-new tmp v- tmp vlength 0.9e f> if
+        rng @ frand rng ! fdup 0.8e f< if
+          \ diffuse
+          center 0.2e lambertian albedo 0e 0e mp material-new sp sphere-new head sp push-front to head
+          fdrop
+        else 0.95e f< if
+          \ metal
+          center 0.2e metal albedo rng @ frand rng ! 0e mp material-new sp sphere-new head sp push-front to head
+        else 
+          \ glass
+          center 0.2e dielectric 1e 1e 1e vp vec3-new 0e 1.5e mp material-new sp sphere-new head sp push-front to head
+        then then
+      then
+    loop
+  loop
+
+  13e 2e 3e vp vec3-new locals| lookfrom |
+  0e 0e 0e vp vec3-new locals| lookat |
   0e 1e 0e vp vec3-new locals| vup |
   pi 9e f/ \ vfov
   16e 9e f/ \ aspect ratio
-  2e \ aperture
-  vp vec3-zero locals| tmp |
-  lookfrom lookat tmp v- tmp vlength  \ focus-dist
+  0.1e \ aperture
+  10e  \ focus-dist
   lookfrom lookat vup vp cp make-camera locals| cam |
   50 locals| samples |
   20 locals| max-depth |
