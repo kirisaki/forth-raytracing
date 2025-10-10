@@ -1,5 +1,5 @@
 \ Generate a random number
-: rand ( u -- u )
+: rand ( u -- u u )
   \ Xorshift64 PRNG
   dup 0= if drop 1 then
   dup 12 rshift xor
